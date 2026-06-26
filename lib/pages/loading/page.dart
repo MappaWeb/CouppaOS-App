@@ -15,15 +15,16 @@ class LoadingPage extends StatelessWidget {
           mainAxisAlignment: .center,
           crossAxisAlignment: .center,
           children: [
-            Image.asset('assets/images/logo.png', width: 127, height: 127),
-            Text(
-              'Mappa'.lang(),
-              style: const TextStyle(fontWeight: .w700, fontSize: 48, color: Colors.white),
+            const Icon(Icons.local_offer, size: 96, color: Colors.white),
+            const SizedBox(height: 16),
+            const Text(
+              'Couppa Mini',
+              style: TextStyle(fontWeight: .w700, fontSize: 40, color: Colors.white),
             ),
 
             Text(
-              context.l10n.searchNearbyStores,
-              style: const TextStyle(fontWeight: .w400, fontSize: 20, color: Colors.white),
+              context.l10n.smartDealHunting,
+              style: const TextStyle(fontWeight: .w400, fontSize: 18, color: Colors.white),
             ),
             const SizedBox(height: 60),
 
