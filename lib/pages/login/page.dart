@@ -4,15 +4,6 @@ import 'bloc.dart';
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
-  static String? redirect(BuildContext context, GoRouterState state) {
-    if (AuthGuard.instance.isAuthenticated) {
-      return getRole() == UserRole.merchant
-          ? '/Merchant/Coupon'
-          : '/User/Coupon';
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -33,7 +24,12 @@ class _LoginView extends StatelessWidget {
   Future<void> _submit(BuildContext context) async {
     final ok = await context.read<LoginCubit>().submit();
     if (!context.mounted) return;
-    if (ok) appNavigator.go(RouterConstants.start);
+    if (ok) {
+      final route = getRole() == UserRole.merchant
+          ? RouterConstants.merchantCoupon
+          : RouterConstants.userCoupon;
+      appNavigator.go(route);
+    }
   }
 
   void _comingSoon() {
@@ -217,7 +213,12 @@ class _PasswordField extends StatelessWidget {
         onSubmitted: (_) async {
           final ok = await ctx.read<LoginCubit>().submit();
           if (!ctx.mounted) return;
-          if (ok) appNavigator.go(RouterConstants.start);
+          if (ok) {
+            final route = getRole() == UserRole.merchant
+                ? RouterConstants.merchantCoupon
+                : RouterConstants.userCoupon;
+            appNavigator.go(route);
+          }
         },
         onChanged: (v) => ctx.read<LoginCubit>().setPassword(v),
         prefixIcon: const Icon(

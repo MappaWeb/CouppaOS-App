@@ -11,8 +11,6 @@ class AppAuthListener extends StatefulWidget {
 }
 
 class _AppAuthListenerState extends State<AppAuthListener> {
-  bool _navigatedPostAuth = false;
-
   @override
   Widget build(BuildContext context) => MultiBlocListener(
     listeners: [
@@ -21,11 +19,11 @@ class _AppAuthListenerState extends State<AppAuthListener> {
           if (state is BootstrapReady) {
             if (state.session != null) {
               context.read<AuthSessionBloc>().add(LoggedIn(state.session!.asSharedUser()));
+              _navigateToHomeIfNotYet(context);
             } else {
               AuthGuard.instance.isAuthenticated = false;
               ApplicationStateNotifier().refresh();
             }
-            _navigatePostAuthIfNeeded(context);
           }
         },
       ),
@@ -51,12 +49,13 @@ class _AppAuthListenerState extends State<AppAuthListener> {
     child: widget.child,
   );
 
-  void _navigatePostAuthIfNeeded(BuildContext context) {
-    if (_navigatedPostAuth || !AuthGuard.instance.isAuthenticated) return;
-    _navigatedPostAuth = true;
+  void _navigateToHomeIfNotYet(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final route = getRole() == UserRole.merchant ? '/Merchant/Coupon' : '/User/Coupon';
-      appNavigator.go(route);
+      final currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
+      if (!currentRoute.startsWith('/User/') && !currentRoute.startsWith('/Merchant/')) {
+        final route = getRole() == UserRole.merchant ? '/Merchant/Coupon' : '/User/Coupon';
+        appNavigator.go(route);
+      }
     });
   }
 }
