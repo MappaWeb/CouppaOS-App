@@ -21,7 +21,7 @@ android {
     defaultConfig {
         applicationId = "com.iot.couppa_mini"
         // Firebase 4.x yêu cầu minSdk >= 23
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

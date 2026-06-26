@@ -1,3 +1,4 @@
+import 'config/dev_bypass.dart';
 import 'import.dart';
 import 'pages/account/page.dart';
 import 'pages/merchant/coupon/page.dart';
@@ -34,6 +35,7 @@ CustomTransitionPage<T> _fadePage<T>({
 }
 
 String? _requireAuth(BuildContext context, GoRouterState state) {
+  if (DevBypass.active) return null;
   if (!AuthGuard.instance.isAuthenticated) return '/Login';
   return null;
 }
@@ -51,6 +53,7 @@ final shellRouter = [
     },
     builder: (context, state, child) => MyApp(state: state, child: child),
     redirect: (context, state) {
+      if (DevBypass.active) return null;
       if (!AuthGuard.instance.isAuthenticated) {
         return '/Login';
       }

@@ -1,4 +1,5 @@
 import 'config/app_flavor.dart';
+import 'config/dev_bypass.dart';
 import 'import.dart';
 
 String get myDomain => AppFlavorConfig.instance.appDomain;
@@ -11,6 +12,7 @@ MeUser? get currentUser {
 }
 
 UserRole getRole() {
+  if (DevBypass.active) return DevBypass.role;
   final String? roleString = currentUser?.role;
   switch (roleString?.toLowerCase()) {
     case 'merchant':
