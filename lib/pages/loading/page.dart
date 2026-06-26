@@ -23,7 +23,7 @@ class LoadingPage extends StatelessWidget {
             ),
 
             Text(
-              context.l10n.smartDealHunting,
+              'Săn coupon - Tiết kiệm thông minh',
               style: const TextStyle(fontWeight: .w400, fontSize: 18, color: Colors.white),
             ),
             const SizedBox(height: 60),

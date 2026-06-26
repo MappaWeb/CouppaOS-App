@@ -68,6 +68,7 @@ Future<void> bootstrap(SharedMonitoring monitoring) async {
     downloadFolderName: 'CouppaMiniOS',
     boxes: const ['auth_cache', 'merchant_cache', 'reference_cache'],
     providers: [
+      RepositoryProvider<ApiClient>.value(value: apiClient),
       BlocProvider<AuthSessionBloc>.value(value: authSetup.authSessionBloc),
       BlocProvider<BootstrapBloc>.value(value: authSetup.bootstrapBloc),
       BlocProvider<NotificationCountCubit>.value(value: notificationCountCubit),
