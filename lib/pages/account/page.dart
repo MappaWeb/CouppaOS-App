@@ -1,4 +1,3 @@
-import '../../config/dev_bypass.dart';
 import '../../import.dart';
 
 class AccountPage extends StatelessWidget {
@@ -59,7 +58,6 @@ class AccountPage extends StatelessWidget {
               style: TextStyle(color: Palette.redTxtColor),
             ),
             onTap: () {
-              DevBypass.exit();
               AuthSetup.instance.authSessionBloc.add(const LoggedOut());
               appNavigator.go('/Start/WithoutLogin');
             },

@@ -3,6 +3,7 @@ import 'bloc/notification_count_cubit.dart';
 import 'bloc/notification_list_bloc.dart';
 import 'bloc/notification_list_event.dart';
 import 'models/notification_model.dart';
+import 'notification_preferences_page.dart';
 import 'widgets/notification_item_widget.dart';
 
 class NotificationListPage extends StatelessWidget {
@@ -24,50 +25,36 @@ class _NotificationListContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final bloc = context.read<NotificationListBloc>();
 
-    return DefaultTabController(
-      length: 2,
-      child: SystemListScaffold<
-          NotificationListBloc,
-          SystemListState<NotificationModel>,
-          NotificationModel>(
-        appBar: BaseAppBar(
-          context: context,
-          title: Text(context.l10n.notifications),
-          actions: [
-            IconButton(
-              tooltip: context.l10n.markAllRead,
-              icon: const Icon(Icons.done_all),
-              onPressed: () {
-                bloc.add(MarkAllNotificationsRead());
-                context.read<NotificationCountCubit>().reset();
-              },
-            ),
-          ],
-        ),
-        header: Container(
-          color: AppColors.cardColor,
-          padding: basePadding,
-          child: TabBar(
-            indicatorSize: TabBarIndicatorSize.tab,
-            tabs: [
-              Tab(text: context.l10n.allNotifications),
-              Tab(text: context.l10n.unreadNotifications),
-            ],
-            onTap: (index) {
-              bloc.add(FilterBaseList(
-                {'unread': index == 1 ? 'true' : null},
-                clearItems: true,
-              ));
+    return SystemListScaffold<
+        NotificationListBloc,
+        SystemListState<NotificationModel>,
+        NotificationModel>(
+      appBar: BaseAppBar(
+        context: context,
+        title: Text(context.l10n.notifications),
+        actions: [
+          IconButton(
+            tooltip: context.l10n.markAllRead,
+            icon: const Icon(Icons.done_all),
+            onPressed: () {
+              bloc.add(MarkAllNotificationsRead());
+              context.read<NotificationCountCubit>().reset();
             },
           ),
-        ),
-        detailBuilder: (context, item, isSelected) {
-          return NotificationItemWidget(
-            item,
-            onTap: () => _onNotificationTap(context, bloc, item),
-          );
-        },
+          IconButton(
+            tooltip: context.l10n.notificationSettings,
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () =>
+                appNavigator.push(const NotificationPreferencesPage()),
+          ),
+        ],
       ),
+      detailBuilder: (context, item, isSelected) {
+        return NotificationItemWidget(
+          item,
+          onTap: () => _onNotificationTap(context, bloc, item),
+        );
+      },
     );
   }
 

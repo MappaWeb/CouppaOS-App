@@ -4,6 +4,15 @@ import 'bloc.dart';
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
+  static String? redirect(BuildContext context, GoRouterState state) {
+    if (AuthGuard.instance.isAuthenticated) {
+      return getRole() == UserRole.merchant
+          ? '/Merchant/Coupon'
+          : '/User/Coupon';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(

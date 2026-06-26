@@ -161,10 +161,22 @@ class LoginCubit extends Cubit<LoginState> {
     String? code;
     String? message;
     if (data is Map) {
-      code = data['code']?.toString() ?? data['errorCode']?.toString();
-      message = data['message']?.toString() ?? data['error']?.toString();
+      // BE bọc lỗi trong `{ error: { code, message, ... } }`.
+      final error = data['error'];
+      if (error is Map) {
+        code = error['code']?.toString();
+        message = error['message']?.toString();
+      }
+      code ??= data['code']?.toString() ?? data['errorCode']?.toString();
+      message ??= data['message']?.toString();
     }
     switch (code) {
+      case 'OTP_REQUIRED':
+        return 'Tài khoản cần xác thực OTP trước khi đăng nhập';
+      case 'VALIDATION_ERROR':
+        return (message != null && message.isNotEmpty)
+            ? message
+            : 'Số điện thoại hoặc mật khẩu không hợp lệ';
       case 'INVALID_CREDENTIALS':
       case 'WRONG_PASSWORD':
         return 'Sai số điện thoại hoặc mật khẩu';

@@ -35,6 +35,9 @@
   "markAllRead": "Mark all as read",
   "notificationContent": "Notification content",
   "noNotifications": "No notifications",
+  "notificationSettings": "Notification settings",
+  "redeemAlerts": "Redeem alerts",
+  "linkRequests": "Link requests",
   "username": "Username",
   "securityGroup": "Security"
 }

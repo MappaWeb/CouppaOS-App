@@ -35,6 +35,9 @@
   "markAllRead": "Đánh dấu tất cả đã đọc",
   "notificationContent": "Nội dung thông báo",
   "noNotifications": "Không có thông báo",
+  "notificationSettings": "Cài đặt thông báo",
+  "redeemAlerts": "Thông báo đổi quà",
+  "linkRequests": "Yêu cầu liên kết",
   "username": "Tên đăng nhập",
   "securityGroup": "Bảo mật"
 }

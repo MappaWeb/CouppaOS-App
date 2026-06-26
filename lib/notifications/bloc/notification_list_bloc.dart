@@ -9,8 +9,8 @@ class NotificationListBloc extends AppListBloc<NotificationModel> {
       : _actionSource = NotificationDataSource(ApiService.notify.dio),
         super(
           empty: const NotificationModel.empty(),
-          dataSource: ApiService.notify.apiPath(ApiAddress.notify.notifications),
-          filters: initialFilters,
+          dataSource: ApiService.notify.apiPath('/notifications'),
+          query: ListQuery.fromMap(initialFilters ?? {})
         ) {
     on<MarkNotificationRead>(_onMarkRead);
     on<MarkAllNotificationsRead>(_onMarkAllRead);

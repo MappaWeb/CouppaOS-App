@@ -1,22 +1,14 @@
-import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../data/notification_data_source.dart';
-import '../data/notification_sse_service.dart';
 
 class NotificationCountCubit extends Cubit<int> {
-  NotificationCountCubit({
-    required NotificationDataSource dataSource,
-    NotificationSseService? sseService,
-  })  : _dataSource = dataSource,
-        super(0) {
-    _sseSub = sseService?.events.listen(_onSseEvent);
+  NotificationCountCubit({required this._dataSource})
+      : super(0) {
     refresh();
   }
 
   final NotificationDataSource _dataSource;
-  StreamSubscription<NotificationSseEvent>? _sseSub;
 
   Future<void> refresh() async {
     final count = await _dataSource.fetchUnreadCount();
@@ -29,21 +21,5 @@ class NotificationCountCubit extends Cubit<int> {
 
   void reset() {
     if (!isClosed) emit(0);
-  }
-
-  void _onSseEvent(NotificationSseEvent event) {
-    switch (event.type) {
-      case 'new_notification':
-      case 'count_update':
-        refresh();
-      case 'read':
-        decrement();
-    }
-  }
-
-  @override
-  Future<void> close() {
-    _sseSub?.cancel();
-    return super.close();
   }
 }

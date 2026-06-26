@@ -32,6 +32,7 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/Login',
     builder: (context, state) => const LoginPage(),
+    redirect: LoginPage.redirect,
   ),
   GoRoute(
     path: '/Merchant/Coupon/Detail',
@@ -73,6 +74,7 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/Start/WithoutLogin',
     builder: (context, state) => const StartWithoutLoginPage(),
+    redirect: StartWithoutLoginPage.redirect,
   ),
   GoRoute(
     path: '/User/Coupon/Detail',

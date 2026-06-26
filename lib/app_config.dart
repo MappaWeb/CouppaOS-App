@@ -6,7 +6,6 @@ import 'data/merchant/merchant_session_cubit.dart';
 import 'import.dart';
 import 'notifications/bloc/notification_count_cubit.dart';
 import 'notifications/data/notification_data_source.dart';
-import 'notifications/data/notification_sse_service.dart';
 import 'pages/loading/page.dart';
 import 'routes.dart';
 import 'shell_router.dart';
@@ -29,18 +28,20 @@ Future<void> bootstrap(SharedMonitoring monitoring) async {
   final authSetup = AuthSetup.create(
     apiClient: apiClient,
     authBaseUrl: 'https://${ApiService.auth.subdomain}.${config.apiDomain}',
+    config: const AuthConfig(
+      mePath: '/auth/me',
+      refreshPath: '/auth/refresh',
+      logoutPath: '/auth/logout',
+      logoutSendsRefreshTokenInBody: true,
+    ),
     bootstrapMinDuration: const Duration(milliseconds: 300),
     onRequireLogin: (_) => appNavigator.pushNamed(RouterConstants.login),
   );
 
-  final notifyBaseUrl =
-      'https://${ApiService.notify.subdomain}.${config.apiDomain}';
-  final sseService = NotificationSseService(baseUrl: notifyBaseUrl, enableLog: false);
   final notifyDataSource =
       NotificationDataSource(apiClient.dio(ApiService.notify));
   final notificationCountCubit = NotificationCountCubit(
     dataSource: notifyDataSource,
-    sseService: sseService,
   );
 
   final merchantSessionCubit = MerchantSessionCubit(apiClient: apiClient);
@@ -75,14 +76,19 @@ Future<void> bootstrap(SharedMonitoring monitoring) async {
       BlocProvider<MerchantSessionCubit>.value(value: merchantSessionCubit),
     ],
     builder: (child) => FieldScope(
-      uploadService: DirectUploadService(dio: apiClient.dio(ApiService.file)),
+      uploadService: createFileUploadService(
+        dio: apiClient.dio(ApiService.file),
+        config: FileUploadConfig(
+          baseUrl: 'https://${ApiService.file.subdomain}.${config.apiDomain}',
+          flow: FileUploadFlow.direct,
+        ),
+      ),
       child: AppAuthListener(child: child),
     ),
     asyncCallbacks: _splashCallbacks(monitoring),
     initializedCallbacks: _initCallbacks(
       authSetup,
       monitoring,
-      sseService,
       notificationCountCubit,
       merchantSessionCubit,
     ),
@@ -105,7 +111,6 @@ List<Future<void> Function()> _splashCallbacks(SharedMonitoring monitoring) => [
 List<Future<void> Function()> _initCallbacks(
   AuthSetup authSetup,
   SharedMonitoring monitoring,
-  NotificationSseService sseService,
   NotificationCountCubit notificationCountCubit,
   MerchantSessionCubit merchantSessionCubit,
 ) => [
@@ -129,13 +134,9 @@ List<Future<void> Function()> _initCallbacks(
 
     authSetup.authSessionBloc.stream.listen((state) {
       if (state is AuthAuthenticated) {
-        final token = authSetup.repository.getAccessTokenSync();
-        if (token != null && token.isNotEmpty) {
-          sseService.connect(token: token);
-        }
         notificationCountCubit.refresh();
       } else {
-        sseService.disconnect();
+        notificationCountCubit.reset();
         merchantSessionCubit.clear();
       }
     });
