@@ -4,11 +4,6 @@ class StartWithoutLoginPage extends StatelessWidget {
   const StartWithoutLoginPage({super.key});
 
   static String? redirect(BuildContext context, GoRouterState state) {
-    if (AuthGuard.instance.isAuthenticated) {
-      return getRole() == UserRole.merchant
-          ? '/Merchant/Coupon'
-          : '/User/Coupon';
-    }
     return null;
   }
 

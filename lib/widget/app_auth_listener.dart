@@ -1,12 +1,17 @@
-import 'package:core_auth/core_auth.dart';
-
 // import '../data/merchant/merchant_session_cubit.dart';
 import '../import.dart';
 
-class AppAuthListener extends StatelessWidget {
+class AppAuthListener extends StatefulWidget {
   const AppAuthListener({super.key, required this.child});
 
   final Widget child;
+
+  @override
+  State<AppAuthListener> createState() => _AppAuthListenerState();
+}
+
+class _AppAuthListenerState extends State<AppAuthListener> {
+  bool _navigatedPostAuth = false;
 
   @override
   Widget build(BuildContext context) => MultiBlocListener(
@@ -20,6 +25,7 @@ class AppAuthListener extends StatelessWidget {
               AuthGuard.instance.isAuthenticated = false;
               ApplicationStateNotifier().refresh();
             }
+            _navigatePostAuthIfNeeded(context);
           }
         },
       ),
@@ -42,6 +48,15 @@ class AppAuthListener extends StatelessWidget {
         },
       ),
     ],
-    child: child,
+    child: widget.child,
   );
+
+  void _navigatePostAuthIfNeeded(BuildContext context) {
+    if (_navigatedPostAuth || !AuthGuard.instance.isAuthenticated) return;
+    _navigatedPostAuth = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final route = getRole() == UserRole.merchant ? '/Merchant/Coupon' : '/User/Coupon';
+      appNavigator.go(route);
+    });
+  }
 }
