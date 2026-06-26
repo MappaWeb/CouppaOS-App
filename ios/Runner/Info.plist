@@ -66,5 +66,61 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<!-- Privacy usage descriptions -->
+	<key>NSCameraUsageDescription</key>
+	<string>Ứng dụng cần truy cập camera để chụp ảnh, quay video và quét mã.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Ứng dụng cần truy cập micro để ghi âm trong video và cuộc gọi.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Ứng dụng cần truy cập thư viện ảnh để chọn ảnh và video.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Ứng dụng cần quyền lưu ảnh và video vào thư viện của bạn.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Ứng dụng sử dụng Face ID để bảo mật dữ liệu đăng nhập.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Ứng dụng sử dụng dữ liệu để phân tích và cải thiện trải nghiệm.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Ứng dụng cần truy cập mạng nội bộ để kết nối với các thiết bị xung quanh.</string>
+
+	<!-- Background modes (Firebase Messaging, audio playback, background fetch) -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+		<string>audio</string>
+	</array>
+
+	<!-- App Transport Security: cho phép WebView load nội dung HTTP nếu cần -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsForMedia</key>
+		<true/>
+	</dict>
+
+	<!-- url_launcher: các scheme app cần mở -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>http</string>
+		<string>https</string>
+		<string>tel</string>
+		<string>mailto</string>
+		<string>sms</string>
+		<string>itms-apps</string>
+	</array>
+
+	<!-- Không sử dụng mã hoá phi tiêu chuẩn (tránh prompt khi nộp store) -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
+	<!-- Firebase Messaging: cho phép FlutterFire SDK swizzle để xử lý APNs token -->
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+
+	<!-- io.flutter plugins yêu cầu io.flutter.embedded_views_preview = YES -->
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>

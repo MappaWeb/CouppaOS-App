@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "13881704400",
+    "project_id": "couppaminios",
+    "storage_bucket": "couppaminios.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:13881704400:android:32d2ac585f761fc27203d5",
+        "android_client_info": {
+          "package_name": "com.iot.couppa_mini"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNTpVQW26OoLhTzxBRZ5UnGRKP_XRSAP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

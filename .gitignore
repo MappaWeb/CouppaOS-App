@@ -43,3 +43,60 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ===== Generated files =====
+# flutter gen-l10n output (regenerated from lib/l10n/*.arb)
+/lib/l10n/app_localizations.dart
+/lib/l10n/app_localizations_*.dart
+
+# flutter_gen_runner / build_runner output
+/lib/gen/
+*.g.dart
+*.freezed.dart
+*.gen.dart
+*.config.dart
+*.mocks.dart
+
+# Firebase / FlutterFire
+# Lưu ý: firebase_options.dart, google-services.json, GoogleService-Info.plist
+# chứa API key client-side (public) — Firebase khuyến nghị COMMIT chúng.
+# Chỉ ignore các log/cache:
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# ===== Native build artifacts =====
+# iOS
+# Lưu ý: Podfile.lock NÊN commit (lock version pods, đảm bảo reproducible build).
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+/ios/Flutter/flutter_export_environment.sh
+/ios/Flutter/ephemeral/
+/ios/Runner.xcworkspace/xcuserdata/
+/ios/Runner.xcodeproj/xcuserdata/
+/ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+
+# macOS
+/macos/Pods/
+
+# Android
+/android/.gradle/
+/android/captures/
+/android/local.properties
+/android/**/GeneratedPluginRegistrant.java
+/android/key.properties
+*.jks
+*.keystore
+
+# ===== IDE / Editor =====
+.vscode/
+*.code-workspace
+
+# ===== Env / secrets =====
+.env
+.env.*
+!.env.example
+secrets/
+
