@@ -10,7 +10,8 @@ MeUser? get currentUser {
   return state is AuthAuthenticated ? state.session.user : null;
 }
 
-UserRole getRole() {
+/// Role thực tế của tài khoản đang đăng nhập, suy ra từ `currentUser.role`.
+UserRole getAccountRole() {
   final String? roleString = currentUser?.role;
   switch (roleString?.toLowerCase()) {
     case 'merchant':
@@ -25,6 +26,24 @@ UserRole getRole() {
     default:
       return UserRole.user;
   }
+}
+
+/// Bật khi tài khoản merchant chọn duyệt app như một người dùng thường.
+/// Chỉ có ý nghĩa khi [canSwitchView] đúng. Shell router, bottom nav và
+/// account page đều lắng nghe notifier này để đổi giao diện tức thời.
+final ValueNotifier<bool> viewAsUser = ValueNotifier<bool>(false);
+
+/// Tài khoản hiện tại có quyền chuyển đổi giữa view merchant/user hay không.
+bool get canSwitchView => getAccountRole() == UserRole.merchant;
+
+/// Reset chế độ xem về mặc định (gọi khi logout / đổi tài khoản).
+void resetViewMode() => viewAsUser.value = false;
+
+/// Role hiệu lực dùng cho điều hướng và UI. Merchant có thể tạm thời
+/// hạ xuống view user qua [viewAsUser]; các role khác giữ nguyên.
+UserRole getRole() {
+  if (canSwitchView && viewAsUser.value) return UserRole.user;
+  return getAccountRole();
 }
 
 enum CouponStatus { active, used, expired }

@@ -5,13 +5,17 @@ class AccountPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final role = getRole();
-    final isMerchant = role == UserRole.merchant;
+    return ValueListenableBuilder<bool>(
+      valueListenable: viewAsUser,
+      builder: (context, _, _) => _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    final isMerchant = getRole() == UserRole.merchant;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isMerchant ? 'Tài khoản Merchant' : 'Tài khoản'),
-      ),
+      appBar: AppBar(title: Text(isMerchant ? 'Tài khoản Merchant' : 'Tài khoản')),
       body: ListView(
         children: [
           const SizedBox(height: 16),
@@ -28,10 +32,7 @@ class AccountPage extends StatelessWidget {
           Center(
             child: Text(
               currentUser?.displayName ?? 'Khách',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
           Center(
@@ -40,8 +41,31 @@ class AccountPage extends StatelessWidget {
               style: const TextStyle(color: Palette.textPrimary4),
             ),
           ),
+          if (getAccountRole() == UserRole.user) ...[
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: FilledButton.icon(
+                onPressed: () => appNavigator.pushNamed(RouterConstants.becomeMerchant),
+                icon: const Icon(Icons.storefront_outlined),
+                label: const Text('Trở thành cửa hàng'),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           const Divider(height: 1),
+          if (canSwitchView)
+            SwitchListTile(
+              secondary: const Icon(Icons.swap_horiz),
+              title: const Text('Dùng như người dùng'),
+              subtitle: Text(
+                viewAsUser.value ? 'Đang xem với quyền người dùng' : 'Đang xem với quyền người bán',
+              ),
+              value: viewAsUser.value,
+              activeThumbColor: Palette.primary,
+              onChanged: (value) => viewAsUser.value = value,
+            ),
+          if (canSwitchView) const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.person_outline),
             title: const Text('Thông tin cá nhân'),
@@ -53,11 +77,9 @@ class AccountPage extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.logout, color: Palette.redTxtColor),
-            title: const Text(
-              'Đăng xuất',
-              style: TextStyle(color: Palette.redTxtColor),
-            ),
+            title: const Text('Đăng xuất', style: TextStyle(color: Palette.redTxtColor)),
             onTap: () {
+              resetViewMode();
               AuthSetup.instance.authSessionBloc.add(const LoggedOut());
               appNavigator.go('/Start/WithoutLogin');
             },

@@ -1,5 +1,7 @@
 
 import 'pages/account/page.dart';
+import 'pages/become_merchant/location/page.dart';
+import 'pages/become_merchant/page.dart';
 import 'pages/loading/page.dart';
 import 'pages/login/page.dart';
 import 'pages/merchant/coupon/detail/page.dart';
@@ -9,6 +11,8 @@ import 'pages/merchant/coupon/page.dart';
 import 'pages/merchant/redeem/confirm/page.dart';
 import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
+import 'pages/otp/page.dart';
+import 'pages/register/page.dart';
 import 'pages/start/page.dart';
 import 'pages/start/without_login/page.dart';
 import 'pages/user/coupon/detail/page.dart';
@@ -19,6 +23,12 @@ class RouterConstants {
 
   ///Router to [AccountPage]
   static String get account => '/Account';
+
+  ///Router to [BecomeMerchantLocationPage]
+  static String get becomeMerchantLocation => '/BecomeMerchant/Location';
+
+  ///Router to [BecomeMerchantPage]
+  static String get becomeMerchant => '/BecomeMerchant';
 
   ///Router to [LoadingPage]
   static String get loading => '/Loading';
@@ -46,6 +56,12 @@ class RouterConstants {
 
   ///Router to [MerchantReportPage]
   static String get merchantReport => '/Merchant/Report';
+
+  ///Router to [OtpPage]
+  static String get otp => '/Otp';
+
+  ///Router to [RegisterPage]
+  static String get register => '/Register';
 
   ///Router to [StartPage]
   static String get start => '/Start';

@@ -138,6 +138,7 @@ List<Future<void> Function()> _initCallbacks(
       } else {
         notificationCountCubit.reset();
         merchantSessionCubit.clear();
+        resetViewMode();
       }
     });
   },

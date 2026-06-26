@@ -1,6 +1,8 @@
 import 'package:core/core.dart' show RouteBase, GoRoute;
 
 import 'pages/account/page.dart';
+import 'pages/become_merchant/location/page.dart';
+import 'pages/become_merchant/page.dart';
 import 'pages/loading/page.dart';
 import 'pages/login/page.dart';
 import 'pages/merchant/coupon/detail/page.dart';
@@ -10,6 +12,8 @@ import 'pages/merchant/coupon/page.dart';
 import 'pages/merchant/redeem/confirm/page.dart';
 import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
+import 'pages/otp/page.dart';
+import 'pages/register/page.dart';
 import 'pages/start/page.dart';
 import 'pages/start/without_login/page.dart';
 import 'pages/user/coupon/detail/page.dart';
@@ -26,13 +30,21 @@ List<RouteBase> get routes => <RouteBase>[
     builder: (context, state) => const AccountPage(),
   ),
   GoRoute(
+    path: '/BecomeMerchant/Location',
+    builder: (context, state) => BecomeMerchantLocationPage(state.uri.queryParameters.isNotEmpty
+    ? state.uri.queryParameters : state.extra as Map?),
+  ),
+  GoRoute(
+    path: '/BecomeMerchant',
+    builder: (context, state) => const BecomeMerchantPage(),
+  ),
+  GoRoute(
     path: '/Loading',
     builder: (context, state) => const LoadingPage(),
   ),
   GoRoute(
     path: '/Login',
     builder: (context, state) => const LoginPage(),
-    redirect: LoginPage.redirect,
   ),
   GoRoute(
     path: '/Merchant/Coupon/Detail',
@@ -65,6 +77,15 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/Merchant/Report',
     builder: (context, state) => const MerchantReportPage(),
+  ),
+  GoRoute(
+    path: '/Otp',
+    builder: (context, state) => OtpPage(state.uri.queryParameters.isNotEmpty
+    ? state.uri.queryParameters : state.extra as Map?),
+  ),
+  GoRoute(
+    path: '/Register',
+    builder: (context, state) => const RegisterPage(),
   ),
   GoRoute(
     path: '/Start',

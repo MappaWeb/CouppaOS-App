@@ -70,6 +70,13 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: viewAsUser,
+      builder: (context, _, _) => _buildShell(context),
+    );
+  }
+
+  Widget _buildShell(BuildContext context) {
     final UserRole role = getRole();
     final List<NavItem> navItems = _getNavItems(role);
     final List<String> currentPaths = navItems.map((e) => e.path).toList();

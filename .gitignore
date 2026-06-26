@@ -72,7 +72,7 @@ firebase-debug.*.log
 
 # ===== Native build artifacts =====
 # iOS
-# Lưu ý: Podfile.lock NÊN commit (lock version pods, đảm bảo reproducible build).
+# Lưu ý: Podfile.lock được ignore (xem mục "Lock files" ở trên).
 /ios/Pods/
 /ios/.symlinks/
 /ios/Flutter/Flutter.framework

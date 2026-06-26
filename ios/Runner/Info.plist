@@ -82,6 +82,8 @@
 	<string>Ứng dụng sử dụng dữ liệu để phân tích và cải thiện trải nghiệm.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Ứng dụng cần truy cập mạng nội bộ để kết nối với các thiết bị xung quanh.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ứng dụng cần truy cập vị trí để xác định địa điểm cửa hàng của bạn.</string>
 
 	<!-- Background modes (Firebase Messaging, audio playback, background fetch) -->
 	<key>UIBackgroundModes</key>

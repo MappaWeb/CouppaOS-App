@@ -41,12 +41,17 @@ String? _requireAuth(BuildContext context, GoRouterState state) {
 final shellRouter = [
   StatefulShellRoute(
     navigatorContainerBuilder: (context, navigationShell, children) {
-      final activeIndices = _roleBranches[getRole()]!;
-      int localIndex = activeIndices.indexOf(navigationShell.currentIndex);
-      if (localIndex < 0) localIndex = 0;
-      return IndexedStack(
-        index: localIndex,
-        children: [for (final i in activeIndices) children[i]],
+      return ValueListenableBuilder<bool>(
+        valueListenable: viewAsUser,
+        builder: (context, _, _) {
+          final activeIndices = _roleBranches[getRole()]!;
+          int localIndex = activeIndices.indexOf(navigationShell.currentIndex);
+          if (localIndex < 0) localIndex = 0;
+          return IndexedStack(
+            index: localIndex,
+            children: [for (final i in activeIndices) children[i]],
+          );
+        },
       );
     },
     builder: (context, state, child) => MyApp(state: state, child: child),
