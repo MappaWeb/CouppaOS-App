@@ -35,7 +35,7 @@ List<RouteBase> get routes => <RouteBase>[
     path: '/Merchant/Coupon/Detail',
     builder: (context, state) => MerchantCouponDetailPage(
       state.uri.queryParameters.isNotEmpty
-          ? state.uri.queryParameters as String
+          ? state.uri.queryParameters
           : (state.extra as Map?)?['id'] ?? '',
     ),
   ),
