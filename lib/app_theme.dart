@@ -1,5 +1,5 @@
 import 'import.dart';
-const _lightSecondaryColor =  Color(0xFF1E90FF);
+const _lightSecondaryColor =  Color(0xFFEE000C);
 const _lightPrimaryColor = Palette.primary;
 final _lightScheme = BaseColorScheme.light( 
   seedColor: _lightSecondaryColor,
@@ -60,7 +60,6 @@ class AppTheme {
       AppThemeExtension(
         logo: 'assets/logo.png',
         logoBuilder: (context) => Image.asset('assets/logo.png', height: 80),
-
         formGroupLabelStyle: const TextStyle(
           color: Palette.textPrimary,
           fontWeight: FontWeight.w400,

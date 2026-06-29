@@ -8,7 +8,7 @@ class LoadingPage extends StatelessWidget {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xff0B74E5), Palette.primary]),
+          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Palette.primary ,Color(0xffffffff)]),
         ),
         width: .infinity,
         child: Column(

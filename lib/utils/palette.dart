@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 class Palette {
   Palette._();
 
-  static const primary = Color(0xFF1A94FF);
+  static const primary = Color(0xFFEE000C);
   static const textPrimary = Color(0xFF101828);
   static const textPrimary2 = Color(0xFF4A5565);
   static const textPrimary3 = Color(0xff99A1AF);
