@@ -9,10 +9,9 @@ import 'merchant_session_cache.dart';
 
 class MerchantSessionCubit extends Cubit<MeMerchant?> {
   MerchantSessionCubit({
-    required ApiClient apiClient,
+    required this._apiClient,
     MerchantSessionCache? cache,
-  })  : _apiClient = apiClient,
-        _cache = cache ?? MerchantSessionCache(),
+  })  : _cache = cache ?? MerchantSessionCache(),
         super(null);
 
   final ApiClient _apiClient;
@@ -32,11 +31,11 @@ class MerchantSessionCubit extends Cubit<MeMerchant?> {
   /// Gọi GET /api/merchants/me, cập nhật state + cache.
   /// Trả về `MeMerchant?` để caller biết kết quả; không throw.
   Future<MeMerchant?> fetchMe() async {
-    if (_kDebug) debugPrint('[Merchant:Me] 🔄 Gọi /api/merchants/me');
+    if (_kDebug) debugPrint('[Merchant:Me] 🔄 Gọi /merchants/me');
     try {
       final res = await _apiClient.get<Map<String, dynamic>>(
         ApiService.merchant,
-        '/api/merchants/me',
+        '/merchants/me',
       );
       final body = res.data;
       if (body == null) {

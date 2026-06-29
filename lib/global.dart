@@ -1,4 +1,5 @@
 import 'config/app_flavor.dart';
+import 'data/account/account_roles.dart';
 import 'import.dart';
 
 String get myDomain => AppFlavorConfig.instance.appDomain;
@@ -10,22 +11,11 @@ MeUser? get currentUser {
   return state is AuthAuthenticated ? state.session.user : null;
 }
 
-/// Role thực tế của tài khoản đang đăng nhập, suy ra từ `currentUser.role`.
+/// Role thực tế của tài khoản đang đăng nhập. App tự suy từ mảng `roles`
+/// của /auth/me (qua [AccountRoles]), không dùng `MeUser.role` của AppCore —
+/// vốn không xử lý được roles dạng object `{role, scopeMerchantId}`.
 UserRole getAccountRole() {
-  final String? roleString = currentUser?.role;
-  switch (roleString?.toLowerCase()) {
-    case 'merchant':
-    case 'merchant_admin':
-    case 'merchant_staff':
-    case 'seller':
-    case 'shop':
-      return UserRole.merchant;
-    case 'user':
-    case 'customer':
-    case 'buyer':
-    default:
-      return UserRole.user;
-  }
+  return AccountRoles.instance.isMerchant ? UserRole.merchant : UserRole.user;
 }
 
 /// Bật khi tài khoản merchant chọn duyệt app như một người dùng thường.

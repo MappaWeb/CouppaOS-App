@@ -2,6 +2,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'app_theme.dart';
 import 'config/app_flavor.dart';
+import 'data/account/account_roles.dart';
+import 'data/account/auth_me_interceptor.dart';
 import 'data/merchant/merchant_session_cubit.dart';
 import 'import.dart';
 import 'notifications/bloc/notification_count_cubit.dart';
@@ -16,6 +18,7 @@ Future<void> bootstrap(SharedMonitoring monitoring) async {
   configureAppSite(domain: config.appDomain, title: config.appName);
   final apiClient = ApiClient(ApiService.urlsFrom(config.apiDomain));
 
+  apiClient.addInterceptorToAll(const AuthMeRolesInterceptor());
   if (config.enableLogging) {
     apiClient.addInterceptorToAll(const ApiLoggerInterceptor());
   }
@@ -115,6 +118,7 @@ List<Future<void> Function()> _initCallbacks(
   MerchantSessionCubit merchantSessionCubit,
 ) => [
   () async {
+    await AccountRoles.instance.hydrate();
     await merchantSessionCubit.hydrateFromCache();
     authSetup.bootstrapBloc.add(const BootstrapStarted());
   },
@@ -135,9 +139,13 @@ List<Future<void> Function()> _initCallbacks(
     authSetup.authSessionBloc.stream.listen((state) {
       if (state is AuthAuthenticated) {
         notificationCountCubit.refresh();
+        if (getAccountRole() == UserRole.merchant) {
+          merchantSessionCubit.fetchMe();
+        }
       } else {
         notificationCountCubit.reset();
         merchantSessionCubit.clear();
+        AccountRoles.instance.clear();
         resetViewMode();
       }
     });
