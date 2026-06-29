@@ -37,6 +37,21 @@ class AccountPage extends StatelessWidget {
             const SizedBox(height: 12),
             _BecomeMerchantCard(),
           ],
+          if (isMerchant) ...[
+            const SizedBox(height: 12),
+            _SectionLabel('Công cụ'),
+            const SizedBox(height: 8),
+            _SettingsGroup(
+              children: [
+                _NavTile(
+                  icon: Icons.qr_code_scanner_rounded,
+                  title: 'Quét mã đổi thưởng',
+                  onTap: () =>
+                      appNavigator.pushNamed(RouterConstants.merchantRedeem),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           _SectionLabel('Cài đặt'),
           const SizedBox(height: 8),

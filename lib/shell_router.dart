@@ -2,7 +2,6 @@ import 'import.dart';
 import 'pages/account/page.dart';
 import 'pages/merchant/coupon/page.dart';
 import 'pages/merchant/partners/page.dart';
-import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
 import 'pages/user/coupon/page.dart';
 import 'pages/user/voucher_claim/page.dart';
@@ -12,14 +11,13 @@ import 'widget/my_app.dart';
 //  0: /User/Coupon          (user)
 //  1: /Merchant/Coupon      (merchant)
 //  2: /Merchant/Partners    (merchant)
-//  3: /Merchant/Redeem      (merchant)
-//  4: /Merchant/Report      (merchant)
-//  5: /Account              (both roles)
-//  6: /User/VoucherClaim    (user)
+//  3: /Merchant/Report      (merchant)
+//  4: /Account              (both roles)
+//  5: /User/VoucherClaim    (user)
 
 const _roleBranches = <UserRole, List<int>>{
-  UserRole.user: [0, 5, 6],
-  UserRole.merchant: [1, 2, 3, 4, 5],
+  UserRole.user: [0, 4, 5],
+  UserRole.merchant: [1, 2, 3, 4],
 };
 
 CustomTransitionPage<T> _fadePage<T>({
@@ -101,19 +99,6 @@ final shellRouter = [
               key: state.pageKey,
               name: state.uri.path,
               child: const MerchantPartnersPage(),
-            ),
-            redirect: _requireAuth,
-          ),
-        ],
-      ),
-      StatefulShellBranch(
-        routes: [
-          GoRoute(
-            path: '/Merchant/Redeem',
-            pageBuilder: (context, state) => _fadePage(
-              key: state.pageKey,
-              name: state.uri.path,
-              child: const MerchantRedeemPage(),
             ),
             redirect: _requireAuth,
           ),

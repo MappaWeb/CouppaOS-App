@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> {
       case UserRole.merchant:
         return const [
           NavItem(
-            label: 'Quản lý chiến dịch',
+            label: 'Chiến dịch',
             path: '/Merchant/Coupon',
             icon: Icons.local_offer_outlined,
           ),
@@ -59,11 +59,6 @@ class _MyAppState extends State<MyApp> {
             label: 'Hợp tác',
             path: '/Merchant/Partners',
             icon: Icons.handshake_outlined,
-          ),
-          NavItem(
-            label: 'Quét mã',
-            path: '/Merchant/Redeem',
-            icon: Icons.qr_code_scanner,
           ),
           NavItem(
             label: 'Báo cáo',
