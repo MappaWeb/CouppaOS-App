@@ -23,11 +23,12 @@ class _MerchantCouponView extends StatelessWidget {
     {'id': 'used', 'title': 'Đã dùng'},
   ];
 
-  static const _filterKeys = ['used', 'redeemFrom', 'redeemTo', 'issueFrom', 'issueTo'];
+  // static const _filterKeys = ['used', 'redeemFrom', 'redeemTo', 'issueFrom', 'issueTo'];
 
   @override
   Widget build(BuildContext context) {
     return SystemListScaffold<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(
+      backgroundColor: AppColors.white,
       appBar: AppBar(title: const Text('Quản lý chiến dịch'), automaticallyImplyLeading: false),
       searchBarOption:
           SearchBarOption<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(

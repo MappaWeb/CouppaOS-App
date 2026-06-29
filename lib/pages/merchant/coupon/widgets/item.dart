@@ -1,4 +1,5 @@
 import '../../../../import.dart';
+import '../../../../widget/coupon_status_badge.dart';
 import '../model.dart';
 
 class MerchantCouponListItem extends StatelessWidget {
@@ -11,116 +12,152 @@ class MerchantCouponListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final issued = item.issuedCount;
     final total = item.totalQuantity;
-    final ratio = total > 0 ? '$issued/$total' : '$issued';
+    final hasQuota = total > 0;
+    final progress = hasQuota ? (issued / total).clamp(0.0, 1.0) : 0.0;
+    final name = item.name.isEmpty ? '(không tên)' : item.name;
 
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 2),
-              child: Icon(Icons.local_offer, color: Palette.primary),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Palette.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.local_offer_outlined,
+                color: Palette.primary,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.name.isEmpty ? '(không tên)' : item.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Palette.textPrimary,
-                    ),
-                  ),
-                  if (item.code.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      item.code,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Palette.textPrimary4,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Palette.textPrimary,
+                            height: 1.3,
+                          ),
+                        ),
                       ),
+                      if (item.status.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        CouponStatusBadge(item.status),
+                      ],
+                    ],
+                  ),
+                  if (item.code.isNotEmpty || item.faceValue != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        if (item.code.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Palette.bgColor,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              item.code,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Palette.textPrimary4,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                        if (item.faceValue != null && item.faceValue! > 0) ...[
+                          if (item.code.isNotEmpty) const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              formatCurrency(item.faceValue!.toDouble()),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Palette.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
-                  if (item.validTo != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'HSD: ${date(item.validTo!.toIso8601String())}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Palette.textPrimary3,
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: hasQuota ? progress : null,
+                            minHeight: 6,
+                            backgroundColor: Palette.bgColor,
+                            valueColor: const AlwaysStoppedAnimation(
+                              Palette.primary,
+                            ),
+                          ),
+                        ),
                       ),
+                      const SizedBox(width: 10),
+                      Text(
+                        hasQuota ? '$issued/$total' : '$issued',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Palette.textPrimary2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (item.validTo != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.event_outlined,
+                          size: 14,
+                          color: Palette.textPrimary3,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'HSD ${date(item.validTo!.toIso8601String())}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Palette.textPrimary3,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                _StatusBadge(status: item.status),
-                const SizedBox(height: 6),
-                Text(
-                  ratio,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Palette.textPrimary2,
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
     );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
-
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    if (status.isEmpty) return const SizedBox.shrink();
-    final (bg, fg) = _colorFor(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        status,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: fg,
-        ),
-      ),
-    );
-  }
-
-  static (Color, Color) _colorFor(String status) {
-    switch (status.toUpperCase()) {
-      case 'ACTIVE':
-      case 'ISSUED':
-        return (Palette.successBgColor, Palette.successTxtColor);
-      case 'EXPIRED':
-      case 'CANCELLED':
-        return (const Color(0xFFFEE2E2), Palette.redTxtColor);
-      case 'DRAFT':
-      default:
-        return (Palette.bgColor, Palette.textPrimary2);
-    }
   }
 }
