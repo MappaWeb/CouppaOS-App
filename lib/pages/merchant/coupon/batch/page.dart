@@ -182,26 +182,18 @@ class _MerchantCouponBatchView extends StatelessWidget {
                 ),
                 wrapper<String>(
                   'scope',
-                  builder: (ctx, data, onChanged) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 4),
-                        child: Text(
-                          'Nơi thanh toán *',
-                          style: TextStyle(fontSize: 13, color: Palette.textPrimary4),
-                        ),
+                  builder: (ctx, data, onChanged) => FieldGroup(
+                    labelText: 'Nơi thanh toán',
+                    required: true,
+                    errorText: data.error,
+                    child: FieldSelect.radioGroup(
+                      items: _scopeItems,
+                      value: (data.getValue() as String?) ?? 'all',
+                      onChanged: (v) => onChanged(
+                        v as String?,
+                        removeFields: v == 'all' ? const ['storeIds'] : null,
                       ),
-                      FieldSelect.radioGroup(
-                        items: _scopeItems,
-                        value: (data.getValue() as String?) ?? 'all',
-                        errorText: data.error,
-                        onChanged: (v) => onChanged(
-                          v as String?,
-                          removeFields: v == 'all' ? const ['storeIds'] : null,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 wrapper<String>(

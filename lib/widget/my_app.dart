@@ -82,6 +82,9 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  static const double _glassBarHeight = 76;
+  static const double _glassBarBottomMargin = 12;
+
   Widget _buildShell(BuildContext context) {
     final UserRole role = getRole();
     final List<NavItem> navItems = _getNavItems(role);
@@ -89,6 +92,10 @@ class _MyAppState extends State<MyApp> {
 
     final String currentPath = widget.state.uri.toString();
     final int currentIndex = max(currentPaths.indexOf(currentPath), 0);
+
+    final mq = MediaQuery.of(context);
+    final bool keyboardOpen = mq.viewInsets.bottom > 0;
+    final double extraBottom = keyboardOpen ? 0 : _glassBarHeight + _glassBarBottomMargin;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -99,11 +106,17 @@ class _MyAppState extends State<MyApp> {
       ),
       child: Scaffold(
         extendBody: true,
-        body: widget.child,
-        bottomNavigationBar: MediaQuery.of(context).viewInsets.bottom > 0
+        body: MediaQuery(
+          data: mq.copyWith(
+            padding: mq.padding.copyWith(bottom: mq.padding.bottom + extraBottom),
+            viewPadding: mq.viewPadding.copyWith(bottom: mq.viewPadding.bottom + extraBottom),
+          ),
+          child: widget.child,
+        ),
+        bottomNavigationBar: keyboardOpen
             ? const SizedBox.shrink()
             : SafeArea(
-                minimum: const EdgeInsets.only(bottom: 12),
+                minimum: const EdgeInsets.only(bottom: _glassBarBottomMargin),
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: GlassBottomBar(

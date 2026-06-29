@@ -25,6 +25,14 @@ class _MerchantCouponView extends StatelessWidget {
     {'id': 'used', 'title': 'Đã dùng'},
   ];
 
+  Future<void> _open(BuildContext context, String route) async {
+    final bloc = context.read<MerchantCouponListBloc>();
+    final result = await appNavigator.pushNamed(route);
+    if (result == true) {
+      bloc.add(RefreshBaseList());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SystemListScaffold<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(
@@ -95,43 +103,31 @@ class _MerchantCouponView extends StatelessWidget {
           },
         ),
       ),
-      floatingActionButton: Builder(
-        builder: (ctx) {
-          Future<void> open(String route) async {
-            final result = await appNavigator.pushNamed(route);
-            if (result == true && ctx.mounted) {
-              ctx.read<MerchantCouponListBloc>().add(RefreshBaseList());
-            }
-          }
-
-          return SpeedDial(
-            icon: Icons.add,
-            activeIcon: Icons.close,
+      floatingActionButton: SpeedDial(
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        backgroundColor: Palette.primary,
+        foregroundColor: Colors.white,
+        spacing: 12,
+        spaceBetweenChildren: 8,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.4,
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.confirmation_number_outlined),
+            label: 'Tạo voucher',
             backgroundColor: Palette.primary,
             foregroundColor: Colors.white,
-            spacing: 12,
-            spaceBetweenChildren: 8,
-            overlayColor: Colors.black,
-            overlayOpacity: 0.4,
-            childMargin: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
-            children: [
-              SpeedDialChild(
-                child: const Icon(Icons.confirmation_number_outlined),
-                label: 'Tạo voucher',
-                backgroundColor: Palette.primary,
-                foregroundColor: Colors.white,
-                onTap: () => open(RouterConstants.merchantCouponBatch),
-              ),
-              SpeedDialChild(
-                child: const Icon(Icons.campaign_outlined),
-                label: 'Tạo chiến dịch',
-                backgroundColor: Palette.primary,
-                foregroundColor: Colors.white,
-                onTap: () => open(RouterConstants.merchantCouponCampaign),
-              ),
-            ],
-          );
-        },
+            onTap: () => _open(context, RouterConstants.merchantCouponBatch),
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.campaign_outlined),
+            label: 'Tạo chiến dịch',
+            backgroundColor: Palette.primary,
+            foregroundColor: Colors.white,
+            onTap: () => _open(context, RouterConstants.merchantCouponCampaign),
+          ),
+        ],
       ),
     );
   }
