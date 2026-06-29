@@ -18,7 +18,7 @@ abstract final class AppApi {
   /// Voucher / Coupon campaigns — absolute URLs (domain riêng,
   /// không có trong `ApiService` enum).
   /// Base: `https://voucher.api-qr.iotcommunication.net`.
-  static const voucher = _VoucherPaths();
+  static final voucher = _VoucherPaths();
 }
 
 // ═════════════════════════════════════════════════════════════════════
@@ -133,112 +133,114 @@ final class _MerchantPaths {
 // ═════════════════════════════════════════════════════════════════════
 
 final class _VoucherPaths {
-  const _VoucherPaths();
+  _VoucherPaths();
 
   static const _base = 'https://voucher.api-qr.iotcommunication.net';
+
+  /// Ghép `_base` với path tương đối → URL tuyệt đối cho Dio.
+  static String _abs(String path) => '$_base$path';
 
   // ── Campaigns (self) ─────────────────────────────────────────
 
   /// GET  /campaigns — Danh sách campaign của merchant
   /// POST /campaigns — Tạo campaign (DRAFT)
-  final campaigns = '$_base/campaigns';
+  final campaigns = _abs('/campaigns');
 
   /// POST /campaigns/issue-direct — Phát hành lô voucher trực tiếp (bearer)
-  final campaignIssueDirect = '$_base/campaigns/issue-direct';
+  final campaignIssueDirect = _abs('/campaigns/issue-direct');
 
   /// GET /campaigns/by-code/{code} — Thông tin campaign theo code (công khai)
-  String campaignByCode(String code) => '$_base/campaigns/by-code/$code';
+  String campaignByCode(String code) => _abs('/campaigns/by-code/$code');
 
   /// GET   /campaigns/{id} — Chi tiết campaign
   /// PATCH /campaigns/{id} — Sửa campaign
-  String campaignById(String id) => '$_base/campaigns/$id';
+  String campaignById(String id) => _abs('/campaigns/$id');
 
   /// PATCH /campaigns/{id}/status — Đổi trạng thái campaign
-  String campaignStatus(String id) => '$_base/campaigns/$id/status';
+  String campaignStatus(String id) => _abs('/campaigns/$id/status');
 
   // ── Vouchers (codes trong campaign) ──────────────────────────
 
   /// POST /campaigns/{id}/vouchers — Sinh voucher theo lô + QR ký HMAC
   /// GET  /campaigns/{id}/vouchers — Liệt kê voucher code của campaign
-  String campaignVouchers(String id) => '$_base/campaigns/$id/vouchers';
+  String campaignVouchers(String id) => _abs('/campaigns/$id/vouchers');
 
   /// GET /campaigns/{id}/batches — Danh sách đợt phát voucher của campaign
-  String campaignBatches(String id) => '$_base/campaigns/$id/batches';
+  String campaignBatches(String id) => _abs('/campaigns/$id/batches');
 
   /// GET /vouchers/branch-list — Danh sách voucher tại chi nhánh
   /// (NV thu ngân / kế toán)
-  final voucherBranchList = '$_base/vouchers/branch-list';
+  final voucherBranchList = _abs('/vouchers/branch-list');
 
   // ── Templates ────────────────────────────────────────────────
 
   /// GET  /templates — Chợ template (mẫu thiết kế đã publish)
   /// POST /templates — Tạo template (editor v2)
-  final templates = '$_base/templates';
+  final templates = _abs('/templates');
 
   /// GET /templates/mine — Template của merchant hiện tại (editor v2)
-  final templatesMine = '$_base/templates/mine';
+  final templatesMine = _abs('/templates/mine');
 
   /// GET   /templates/{id} — Chi tiết template (kèm layout document)
   /// PATCH /templates/{id} — Cập nhật template của merchant (editor v2)
-  String templateById(String id) => '$_base/templates/$id';
+  String templateById(String id) => _abs('/templates/$id');
 
   // ── Claim & Redeem ───────────────────────────────────────────
 
   /// POST /vouchers/claims — Nhận 1 voucher từ campaign (atomic, chống trùng)
-  final voucherClaims = '$_base/vouchers/claims';
+  final voucherClaims = _abs('/vouchers/claims');
 
   /// GET /vouchers/mine — Voucher đã nhận của tôi (kèm QR cố định)
-  final vouchersMine = '$_base/vouchers/mine';
+  final vouchersMine = _abs('/vouchers/mine');
 
   /// POST /vouchers/redeem-nonce — Khách tạo nonce QR động cho voucher của mình
-  final voucherRedeemNonce = '$_base/vouchers/redeem-nonce';
+  final voucherRedeemNonce = _abs('/vouchers/redeem-nonce');
 
   /// POST /vouchers/redeem — Nhân viên redeem voucher (row-lock)
-  final voucherRedeem = '$_base/vouchers/redeem';
+  final voucherRedeem = _abs('/vouchers/redeem');
 
   /// POST /vouchers/verify — Kiểm tra voucher (không đổi trạng thái)
-  final voucherVerify = '$_base/vouchers/verify';
+  final voucherVerify = _abs('/vouchers/verify');
 
   // ── Admin — [system_admin] ───────────────────────────────────
 
   /// GET /admin/campaigns — Campaign toàn hệ thống (lọc theo merchantId)
-  final adminCampaigns = '$_base/admin/campaigns';
+  final adminCampaigns = _abs('/admin/campaigns');
 
   /// GET /admin/campaigns/{id}/vouchers — Mã voucher của campaign (đã che 1 phần)
-  String adminCampaignVouchers(String id) =>
-      '$_base/admin/campaigns/$id/vouchers';
+  String adminCampaignVouchers(String id) => _abs('/admin/campaigns/$id/vouchers');
 
   /// POST /admin/campaigns/{merchantId} — Tạo campaign cho merchant
   String adminCampaignByMerchant(String merchantId) =>
-      '$_base/admin/campaigns/$merchantId';
+      _abs('/admin/campaigns/$merchantId');
 
   /// POST /admin/campaigns/{merchantId}/issue-direct — Phát hành lô voucher
   String adminCampaignIssueDirect(String merchantId) =>
-      '$_base/admin/campaigns/$merchantId/issue-direct';
+      _abs('/admin/campaigns/$merchantId/issue-direct');
 
   /// PATCH /admin/campaigns/{id} — Sửa campaign
-  String adminCampaignById(String id) => '$_base/admin/campaigns/$id';
+  String adminCampaignById(String id) => _abs('/admin/campaigns/$id');
 
   /// PATCH /admin/campaigns/{id}/status — Đổi trạng thái campaign
-  String adminCampaignStatus(String id) => '$_base/admin/campaigns/$id/status';
+  String adminCampaignStatus(String id) => _abs('/admin/campaigns/$id/status');
 
   /// PATCH /admin/campaigns/codes/{codeId}/revoke — Thu hồi (hết hạn) 1 mã
   String adminCodeRevoke(String codeId) =>
-      '$_base/admin/campaigns/codes/$codeId/revoke';
+      _abs('/admin/campaigns/codes/$codeId/revoke');
 
   /// GET  /admin/templates — Tất cả mẫu template
   /// POST /admin/templates — Tạo mẫu template (ảnh nền + vị trí trường)
-  final adminTemplates = '$_base/admin/templates';
+  final adminTemplates = _abs('/admin/templates');
 
   /// PATCH  /admin/templates/{id} — Cập nhật mẫu (vị trí trường, publish…)
   /// DELETE /admin/templates/{id} — Xoá mẫu
-  String adminTemplateById(String id) => '$_base/admin/templates/$id';
+  String adminTemplateById(String id) => _abs('/admin/templates/$id');
 
   // ── Internal & QR ────────────────────────────────────────────
 
   /// GET /internal/codes/{id}
-  String internalCodeById(String id) => '$_base/internal/codes/$id';
+  String internalCodeById(String id) => _abs('/internal/codes/$id');
 
   /// GET /qr/verify — Verify QR (công khai)
-  final qrVerify = '$_base/qr/verify';
+  final qrVerify = _abs('/qr/verify');
 }
