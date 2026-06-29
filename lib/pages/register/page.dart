@@ -64,9 +64,7 @@ class _RegisterView extends StatelessWidget {
                 children: [
                   const SizedBox(height: 8),
                   const _Header(),
-                  const SizedBox(height: 32),
                   const _PhoneField(),
-                  const SizedBox(height: 16),
                   const _PasswordField(),
                   const SizedBox(height: 12),
                   const PasswordValidNoteMap<RegisterCubit, RegisterState>(

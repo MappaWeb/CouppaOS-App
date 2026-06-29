@@ -69,11 +69,8 @@ class _LoginView extends StatelessWidget {
                       const _Brand(),
                       const SizedBox(height: 40),
                       const _Header(),
-                      const SizedBox(height: 32),
                       const _PhoneField(),
-                      const SizedBox(height: 16),
                       const _PasswordField(),
-                      const SizedBox(height: 8),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
@@ -92,7 +89,6 @@ class _LoginView extends StatelessWidget {
                           child: const Text('Quên mật khẩu?'),
                         ),
                       ),
-                      const SizedBox(height: 24),
                       _SubmitButton(onPressed: () => _submit(context)),
                       const Spacer(),
                       const SizedBox(height: 32),
