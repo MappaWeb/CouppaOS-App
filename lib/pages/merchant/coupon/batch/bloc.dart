@@ -1,6 +1,6 @@
 import '../../../../import.dart';
 
-/// Form tạo chiến dịch mới — `POST {AppApi.voucher.campaignIssueDirect}`.
+/// Form phát hành lô voucher trực tiếp — `POST {AppApi.voucher.campaignIssueDirect}`.
 ///
 /// Field keys (flat trong `state.fields`):
 /// - `name` String? (optional)
@@ -8,23 +8,23 @@ import '../../../../import.dart';
 /// - `quantity` String (formatted với dấu chấm, parse về int khi submit) — required
 /// - `validFrom` String ISO datetime? — optional; nếu có 1 trong 2 (`validFrom`/`validTo`) thì required cả 2
 /// - `validTo` String ISO datetime? — optional, > validFrom; nếu có `validFrom` thì required
-/// - `daysOfWeek` `List<int>?` (0=T2 … 6=CN) — optional
+/// - `daysOfWeek` `List<int>?` (CN=0, T2=1 … T7=6) — optional
 /// - `timeStart`, `timeEnd` String 'HH:mm' — optional, nếu có 1 thì cả 2 required
 /// - `scope` String — 'all' | 'stores' — required (default 'all')
 /// - `storeIds` String? — comma-separated ids; required nếu `scope == 'stores'` (split khi submit)
 /// - `partnerIds` String? — comma-separated ids; optional, split khi submit (output `[{merchantId, scope:'all'}]`)
 /// - `note` String? — optional
-class MerchantCouponFormBloc extends SystemFormBloc<SystemFormState> {
-  MerchantCouponFormBloc({required ApiClient apiClient})
+class MerchantCouponBatchBloc extends SystemFormBloc<SystemFormState> {
+  MerchantCouponBatchBloc({required ApiClient apiClient})
     : this._(apiClient);
 
-  MerchantCouponFormBloc._(this._apiClient)
+  MerchantCouponBatchBloc._(this._apiClient)
     : super(
         rules: _validationRules(),
-        initialState: const SystemFormState(
+        initialState: SystemFormState(
           status: SystemFormStateStatus.initial,
-          fields: {'scope': 'all'},
-          data: {},
+          fields: const {'scope': 'all'},
+          data: const {},
         ),
       );
 
@@ -32,7 +32,7 @@ class MerchantCouponFormBloc extends SystemFormBloc<SystemFormState> {
 
   static Map<String, Rules> _validationRules() => {
     'faceValue': Rules(
-      required: 'Vui lòng nhập mệnh giá',
+    //   required: 'Vui lòng nhập mệnh giá',
       checkData: (data) => _validatePositiveInt(data.value, 'Mệnh giá phải > 0'),
     ),
     'quantity': Rules(
@@ -125,16 +125,15 @@ class MerchantCouponFormBloc extends SystemFormBloc<SystemFormState> {
     }..removeWhere((_, v) => v == null);
 
     try {
-      await _apiClient
-          .dio(ApiService.coupon)
-          .post(AppApi.voucher.campaignIssueDirect, data: payload);
+      final dio = _apiClient.dio(ApiService.coupon);
+      await dio.post(AppApi.voucher.campaignIssueDirect, data: payload);
     } on DioException catch (e) {
       emit(state.copyWith(status: SystemFormStateStatus.fail, message: _mapError(e)));
       return;
     } catch (_) {
       emit(state.copyWith(
         status: SystemFormStateStatus.fail,
-        message: 'Tạo chiến dịch thất bại',
+        message: 'Phát hành lô voucher thất bại',
       ));
       return;
     }
@@ -228,7 +227,7 @@ class MerchantCouponFormBloc extends SystemFormBloc<SystemFormState> {
         return 'Đã vượt hạn mức phát hành';
       default:
         if (message != null && message.isNotEmpty) return message;
-        return 'Tạo chiến dịch thất bại';
+        return 'Phát hành lô voucher thất bại';
     }
   }
 }

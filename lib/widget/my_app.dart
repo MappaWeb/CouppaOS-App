@@ -50,6 +50,11 @@ class _MyAppState extends State<MyApp> {
             icon: Icons.local_offer_outlined,
           ),
           NavItem(
+            label: 'Hợp tác',
+            path: '/Merchant/Partners',
+            icon: Icons.handshake_outlined,
+          ),
+          NavItem(
             label: 'Quét mã',
             path: '/Merchant/Redeem',
             icon: Icons.qr_code_scanner,

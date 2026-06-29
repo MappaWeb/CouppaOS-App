@@ -3,10 +3,11 @@ import '../../../../widget/coupon_status_badge.dart';
 import '../model.dart';
 
 class MerchantCouponListItem extends StatelessWidget {
-  const MerchantCouponListItem(this.item, {super.key, this.onTap});
+  const MerchantCouponListItem(this.item, {super.key, this.onTap, this.onEdit});
 
   final VoucherModel item;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +16,22 @@ class MerchantCouponListItem extends StatelessWidget {
     final hasQuota = total > 0;
     final progress = hasQuota ? (issued / total).clamp(0.0, 1.0) : 0.0;
     final name = item.name.isEmpty ? '(không tên)' : item.name;
+    final canEdit = item.status.toUpperCase() != 'ACTIVE';
 
     return ItemBase(
       onPressed: onTap,
-      showMultiActions: false,
+      showMultiActions: true,
+      actions: [
+        ItemMenuAction(
+          key: 'edit',
+          label: 'Sửa',
+          iconData: Icons.edit_outlined,
+          enabled: canEdit,
+        ),
+      ],
+      onAction: (ctx, key) {
+        if (key == 'edit') onEdit?.call();
+      },
       backgroundColor: Palette.cardColor,
       borderRadius: BorderRadius.circular(12),
       side: const BorderSide(color: Color(0xFFEEEEEE)),

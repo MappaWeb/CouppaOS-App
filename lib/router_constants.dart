@@ -5,8 +5,9 @@ import 'pages/become_merchant/page.dart';
 import 'pages/forgot_password/page.dart';
 import 'pages/loading/page.dart';
 import 'pages/login/page.dart';
+import 'pages/merchant/coupon/batch/page.dart';
+import 'pages/merchant/coupon/campaign/page.dart';
 import 'pages/merchant/coupon/detail/page.dart';
-import 'pages/merchant/coupon/form/page.dart';
 import 'pages/merchant/coupon/issue/page.dart';
 import 'pages/merchant/coupon/page.dart';
 import 'pages/merchant/partners/page.dart';
@@ -40,11 +41,14 @@ class RouterConstants {
   ///Router to [LoginPage]
   static String get login => '/Login';
 
+  ///Router to [MerchantCouponBatchPage]
+  static String get merchantCouponBatch => '/Merchant/Coupon/Batch';
+
+  ///Router to [MerchantCouponCampaignPage]
+  static String get merchantCouponCampaign => '/Merchant/Coupon/Campaign';
+
   ///Router to [MerchantCouponDetailPage]
   static String get merchantCouponDetail => '/Merchant/Coupon/Detail';
-
-  ///Router to [MerchantCouponFormPage]
-  static String get merchantCouponForm => '/Merchant/Coupon/Form';
 
   ///Router to [MerchantCouponIssuePage]
   static String get merchantCouponIssue => '/Merchant/Coupon/Issue';

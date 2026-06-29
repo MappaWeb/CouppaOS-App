@@ -75,7 +75,7 @@ class _Content extends StatelessWidget {
 //           onSelected: (value) async {
 //             if (value == 'edit') {
 //               await appNavigator.pushNamed(
-//                 RouterConstants.merchantCouponForm,
+//                 RouterConstants.merchantCouponCampaign,
 //                 arguments: {'id': id},
 //               );
 //               if (context.mounted) {
@@ -239,7 +239,7 @@ class _InfoTab extends StatelessWidget {
 
   static String _daysOfWeek(dynamic v) {
     if (v is! List || v.isEmpty) return 'Mọi ngày';
-    const labels = {1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7', 7: 'CN'};
+    const labels = {0: 'CN', 1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7'};
     return v.map((e) => labels[e is int ? e : int.tryParse('$e')] ?? '$e').join(', ');
   }
 

@@ -2,58 +2,84 @@ import 'package:flutter/services.dart';
 
 import '../../../../import.dart';
 import 'bloc.dart';
-import 'widgets/days_of_week_picker.dart';
 
-/// Form tạo chiến dịch mới (`/Merchant/Coupon/Form`).
+/// Form tạo / sửa chiến dịch (`/Merchant/Coupon/Campaign`).
 ///
-/// Submit thành công → snackbar success → `pop(true)`. List sẽ refresh.
-class MerchantCouponFormPage extends StatelessWidget {
-  const MerchantCouponFormPage(this.args, {super.key});
+/// Submit thành công → snackbar success → `pop(true)`.
+class MerchantCouponCampaignPage extends StatelessWidget {
+  const MerchantCouponCampaignPage(this.args, {super.key});
 
   final Map? args;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MerchantCouponFormBloc(apiClient: context.read<ApiClient>()),
-      child: const _MerchantCouponFormView(),
+      create: (_) =>
+          MerchantCouponCampaignFormBloc(apiClient: context.read<ApiClient>(), initialData: args),
+      child: _MerchantCouponCampaignView(isEdit: args?['id'] != null),
     );
   }
 }
 
-class _MerchantCouponFormView extends StatelessWidget {
-  const _MerchantCouponFormView();
+class _MerchantCouponCampaignView extends StatelessWidget {
+  const _MerchantCouponCampaignView({required this.isEdit});
+
+  final bool isEdit;
 
   static const _scopeItems = [
     {'id': 'all', 'title': 'Mọi cơ sở'},
     {'id': 'stores', 'title': 'Chọn cơ sở'},
   ];
 
+  static const _claimLayoutItems = [
+    {'id': 'A', 'title': 'Vé'},
+    {'id': 'B', 'title': 'Tràn ảnh'},
+    {'id': 'C', 'title': 'Tối giản'},
+  ];
+
+  static const _daysOfWeekItems = [
+    {'id': '1', 'title': 'T2'},
+    {'id': '2', 'title': 'T3'},
+    {'id': '3', 'title': 'T4'},
+    {'id': '4', 'title': 'T5'},
+    {'id': '5', 'title': 'T6'},
+    {'id': '6', 'title': 'T7'},
+    {'id': '0', 'title': 'CN'},
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return SystemFormScaffold<MerchantCouponFormBloc, SystemFormState>(
+    return SystemFormScaffold<MerchantCouponCampaignFormBloc, SystemFormState>(
       scaffoldBackgroundColor: AppColors.white,
-      appBarBuilder: (ctx, state) => BaseAppBar(context: ctx, title: const Text('Tạo chiến dịch')),
+      appBarBuilder: (ctx, state) =>
+          BaseAppBar(context: ctx, title: Text(isEdit ? 'Sửa chiến dịch' : 'Tạo chiến dịch')),
       bottomNavigationBar: (ctx, state, submitBtn) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: FilledButton(
             onPressed: state.isSubmitting
                 ? null
-                : () => ctx.read<MerchantCouponFormBloc>().add(SubmitSystemForm()),
+                : () => ctx.read<MerchantCouponCampaignFormBloc>().add(SubmitSystemForm()),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Text(state.isSubmitting ? 'Đang tạo...' : 'Tạo chiến dịch'),
+              child: Text(
+                state.isSubmitting
+                    ? (isEdit ? 'Đang lưu...' : 'Đang tạo...')
+                    : (isEdit ? 'Lưu thay đổi' : 'Tạo chiến dịch'),
+              ),
             ),
           ),
         ),
       ),
       builder: (context, state, wrapper) {
-        return BlocListener<MerchantCouponFormBloc, SystemFormState>(
+        return BlocListener<MerchantCouponCampaignFormBloc, SystemFormState>(
           listenWhen: (prev, curr) => prev.status != curr.status,
           listener: (ctx, st) {
             if (st.isSuccess) {
-              showMessage('Tạo chiến dịch thành công', type: 'success');
+              showMessage(
+                isEdit ? 'Cập nhật chiến dịch thành công' : 'Tạo chiến dịch thành công',
+                type: 'success',
+              );
               appNavigator.pop(true);
             } else if (st.isFail && st.message != null) {
               showMessage(st.message!, type: 'error');
@@ -68,7 +94,8 @@ class _MerchantCouponFormView extends StatelessWidget {
                 wrapper<String>(
                   'name',
                   builder: (ctx, data, onChanged) => FieldText(
-                    labelText: 'Tên đợt phát hành',
+                    labelText: 'Tên chiến dịch',
+                    required: true,
                     value: data.getValue() as String?,
                     errorText: data.error,
                     onChanged: onChanged,
@@ -78,7 +105,6 @@ class _MerchantCouponFormView extends StatelessWidget {
                   'faceValue',
                   builder: (ctx, data, onChanged) => FieldText(
                     labelText: 'Mệnh giá',
-                    required: true,
                     value: data.getValue() as String?,
                     errorText: data.error,
                     keyboardType: TextInputType.number,
@@ -102,6 +128,7 @@ class _MerchantCouponFormView extends StatelessWidget {
                   'validFrom',
                   builder: (ctx, data, onChanged) => FieldDateTime(
                     labelText: 'Ngày bắt đầu',
+                    required: true,
                     value: data.getValue() as String?,
                     errorText: data.error,
                     onChanged: onChanged,
@@ -111,6 +138,7 @@ class _MerchantCouponFormView extends StatelessWidget {
                   'validTo',
                   builder: (ctx, data, onChanged) => FieldDateTime(
                     labelText: 'Ngày kết thúc',
+                    required: true,
                     value: data.getValue() as String?,
                     errorText: data.error,
                     onChanged: onChanged,
@@ -119,10 +147,27 @@ class _MerchantCouponFormView extends StatelessWidget {
                 wrapper<List<int>>(
                   'daysOfWeek',
                   isMultiple: true,
-                  builder: (ctx, data, onChanged) => DaysOfWeekPicker(
-                    value: (data.getValue() as List?)?.cast<int>(),
+                  builder: (ctx, data, onChanged) => FieldGroup(
+                    labelText: 'Ngày trong tuần',
                     errorText: data.error,
-                    onChanged: onChanged,
+                    child: FieldSelect.chips(
+                      items: _daysOfWeekItems,
+                      value: (data.getValue() as List?)?.cast<int>(),
+                      isMulti: true,
+                      onChanged: (csv) {
+                        if (csv.isEmpty) {
+                          onChanged(null);
+                          return;
+                        }
+                        final next = csv
+                            .split(',')
+                            .where((s) => s.isNotEmpty)
+                            .map(int.parse)
+                            .toList()
+                          ..sort();
+                        onChanged(next.isEmpty ? null : next);
+                      },
+                    ),
                   ),
                 ),
                 Row(
@@ -211,12 +256,51 @@ class _MerchantCouponFormView extends StatelessWidget {
                   ),
                 ),
                 wrapper<String>(
+                  'code',
+                  builder: (ctx, data, onChanged) => FieldText(
+                    labelText: 'Mã link',
+                    value: data.getValue() as String?,
+                    errorText: data.error,
+                    onChanged: onChanged,
+                  ),
+                ),
+                wrapper<String>(
+                  'claimLayout',
+                  builder: (ctx, data, onChanged) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 4),
+                        child: Text(
+                          'Giao diện trang nhận quà *',
+                          style: TextStyle(fontSize: 13, color: Palette.textPrimary4),
+                        ),
+                      ),
+                      FieldSelect.radioGroup(
+                        items: _claimLayoutItems,
+                        value: (data.getValue() as String?) ?? 'A',
+                        errorText: data.error,
+                        onChanged: (v) => onChanged(v as String?),
+                      ),
+                    ],
+                  ),
+                ),
+                wrapper<String>(
                   'note',
                   builder: (ctx, data, onChanged) => FieldText(
                     labelText: 'Ghi chú',
                     value: data.getValue() as String?,
                     errorText: data.error,
                     maxLines: 3,
+                    onChanged: onChanged,
+                  ),
+                ),
+
+                wrapper<bool>(
+                  'otpRequired',
+                  builder: (ctx, data, onChanged) => FieldCheckbox(
+                    labelText: 'Yêu cầu OTP khi nhận quà',
+                    value: (data.getValue() as bool?) ?? false,
                     onChanged: onChanged,
                   ),
                 ),
@@ -230,7 +314,6 @@ class _MerchantCouponFormView extends StatelessWidget {
   }
 }
 
-/// Format số với dấu chấm phân cách 3 chữ số (vd `1234567` → `1.234.567`).
 class _ThousandsFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {

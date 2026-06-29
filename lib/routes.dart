@@ -6,8 +6,9 @@ import 'pages/become_merchant/page.dart';
 import 'pages/forgot_password/page.dart';
 import 'pages/loading/page.dart';
 import 'pages/login/page.dart';
+import 'pages/merchant/coupon/batch/page.dart';
+import 'pages/merchant/coupon/campaign/page.dart';
 import 'pages/merchant/coupon/detail/page.dart';
-import 'pages/merchant/coupon/form/page.dart';
 import 'pages/merchant/coupon/issue/page.dart';
 import 'pages/merchant/coupon/page.dart';
 import 'pages/merchant/partners/page.dart';
@@ -52,13 +53,17 @@ List<RouteBase> get routes => <RouteBase>[
     builder: (context, state) => const LoginPage(),
   ),
   GoRoute(
-    path: '/Merchant/Coupon/Detail',
-    builder: (context, state) => MerchantCouponDetailPage(state.uri.queryParameters.isNotEmpty
+    path: '/Merchant/Coupon/Batch',
+    builder: (context, state) => const MerchantCouponBatchPage(),
+  ),
+  GoRoute(
+    path: '/Merchant/Coupon/Campaign',
+    builder: (context, state) => MerchantCouponCampaignPage(state.uri.queryParameters.isNotEmpty
     ? state.uri.queryParameters : state.extra as Map?),
   ),
   GoRoute(
-    path: '/Merchant/Coupon/Form',
-    builder: (context, state) => MerchantCouponFormPage(state.uri.queryParameters.isNotEmpty
+    path: '/Merchant/Coupon/Detail',
+    builder: (context, state) => MerchantCouponDetailPage(state.uri.queryParameters.isNotEmpty
     ? state.uri.queryParameters : state.extra as Map?),
   ),
   GoRoute(
