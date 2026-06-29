@@ -45,7 +45,7 @@ class AccountPage extends StatelessWidget {
               children: [
                 _NavTile(
                   icon: Icons.qr_code_scanner_rounded,
-                  title: 'Quét mã đổi thưởng',
+                  title: 'Đổi mã tại quầy',
                   onTap: () =>
                       appNavigator.pushNamed(RouterConstants.merchantRedeem),
                 ),

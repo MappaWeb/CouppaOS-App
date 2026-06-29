@@ -72,11 +72,15 @@ class _MerchantRedeemViewState extends State<_MerchantRedeemView> {
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
+      appBar: BaseAppBar(
+        context: context,
         title: const Text(
           'Quét mã coupon',
           style: TextStyle(color: Colors.white),
         ),
+        leading: IconButton(onPressed: (){
+          appNavigator.pop();
+        }, icon: Icon(Icons.arrow_back, color: Colors.white,)),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
