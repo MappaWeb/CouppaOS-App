@@ -14,19 +14,19 @@ class VoucherCodeStatusBadge extends StatelessWidget {
 
     switch (s) {
       case 'ISSUED':
-        return isLarge ? AppStatus.successLarge(label) : AppStatus.success(label);
+        return isLarge ? AppStatus.expiredLarge(label) : AppStatus.expired(label);
 
       case 'REDEEMED':
         return isLarge ? AppStatus.other1Large(label) : AppStatus.other1(label);
 
-      case 'RESERVED':
-        return isLarge ? AppStatus.warningLarge(label) : AppStatus.warning(label);
+      // case 'RESERVED':
+      //   return isLarge ? AppStatus.warningLarge(label) : AppStatus.warning(label);
 
-      case 'AVAILABLE':
-        return isLarge ? AppStatus.informationLarge(label) : AppStatus.information(label);
+      // case 'AVAILABLE':
+      //   return isLarge ? AppStatus.informationLarge(label) : AppStatus.information(label);
 
-      case 'CANCELLED':
-        return isLarge ? AppStatus.errorLarge(label) : AppStatus.error(label);
+      // case 'CANCELLED':
+      //   return isLarge ? AppStatus.errorLarge(label) : AppStatus.error(label);
 
       case 'EXPIRED':
       default:
@@ -36,18 +36,18 @@ class VoucherCodeStatusBadge extends StatelessWidget {
 
   static String _label(String upper) {
     switch (upper) {
-      case 'AVAILABLE':
-        return 'Sẵn sàng';
-      case 'RESERVED':
-        return 'Đang giữ chỗ';
+      // case 'AVAILABLE':
+      //   return 'Sẵn sàng';
+      // case 'RESERVED':
+      //   return 'Đang giữ chỗ';
       case 'ISSUED':
-        return 'Đã phát hành';
+        return 'Chưa dùng';
       case 'REDEEMED':
         return 'Đã sử dụng';
       case 'EXPIRED':
         return 'Hết hạn';
-      case 'CANCELLED':
-        return 'Đã hủy';
+      // case 'CANCELLED':
+      //   return 'Đã hủy';
       default:
         return upper.isEmpty ? '—' : upper;
     }

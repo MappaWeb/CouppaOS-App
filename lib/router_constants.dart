@@ -9,6 +9,7 @@ import 'pages/merchant/coupon/detail/page.dart';
 import 'pages/merchant/coupon/form/page.dart';
 import 'pages/merchant/coupon/issue/page.dart';
 import 'pages/merchant/coupon/page.dart';
+import 'pages/merchant/partners/page.dart';
 import 'pages/merchant/redeem/confirm/page.dart';
 import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
@@ -50,6 +51,9 @@ class RouterConstants {
 
   ///Router to [MerchantCouponPage]
   static String get merchantCoupon => '/Merchant/Coupon';
+
+  ///Router to [MerchantPartnersPage]
+  static String get merchantPartners => '/Merchant/Partners';
 
   ///Router to [MerchantRedeemConfirmPage]
   static String get merchantRedeemConfirm => '/Merchant/Redeem/Confirm';

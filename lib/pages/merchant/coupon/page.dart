@@ -23,19 +23,20 @@ class _MerchantCouponView extends StatelessWidget {
     {'id': 'used', 'title': 'Đã dùng'},
   ];
 
-  // static const _filterKeys = ['used', 'redeemFrom', 'redeemTo', 'issueFrom', 'issueTo'];
-
   @override
   Widget build(BuildContext context) {
     return SystemListScaffold<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(
-      backgroundColor: AppColors.white,
-      appBar: AppBar(title: const Text('Quản lý chiến dịch'), automaticallyImplyLeading: false),
+      backgroundColor: Palette.cardColor,
+      appBar: BaseAppBar(
+        context: context,
+        title: const Text('Quản lý chiến dịch'),
+        automaticallyImplyLeading: false,
+      ),
       searchBarOption:
           SearchBarOption<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(
             hintText: 'Tìm theo mã / tên',
-            // counterKeys: _filterKeys,
             extraFilters: (getFilter, onChanged) => Column(
-              spacing: 8,
+              spacing: 12,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 FieldSelect.dropdown(
@@ -71,12 +72,24 @@ class _MerchantCouponView extends StatelessWidget {
               ],
             ),
           ),
-      separatorBuilder: (_, _) => const Divider(height: 1, color: Palette.dividerColor),
+      padding: const EdgeInsets.all(16),
       detailBuilder: (context, item, isSelected) => MerchantCouponListItem(
         item,
         onTap: () {
-          appNavigator.pushNamed('/Merchant/Coupon/Detail', queryParameters: {'id': item.id});
+          appNavigator.pushNamed(RouterConstants.merchantCouponDetail, arguments: {'id': item.id});
         },
+      ),
+      floatingActionButton: Builder(
+        builder: (ctx) => FloatingActionButton.extended(
+          icon: const Icon(Icons.add),
+          label: const Text('Tạo chiến dịch'),
+          onPressed: () async {
+            final result = await appNavigator.pushNamed(RouterConstants.merchantCouponForm);
+            if (result == true && ctx.mounted) {
+              ctx.read<MerchantCouponListBloc>().add(RefreshBaseList());
+            }
+          },
+        ).paddingOnly(bottom: MediaQuery.paddingOf(context).bottom),
       ),
     );
   }

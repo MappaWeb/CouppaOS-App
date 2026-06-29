@@ -10,6 +10,7 @@ import 'pages/merchant/coupon/detail/page.dart';
 import 'pages/merchant/coupon/form/page.dart';
 import 'pages/merchant/coupon/issue/page.dart';
 import 'pages/merchant/coupon/page.dart';
+import 'pages/merchant/partners/page.dart';
 import 'pages/merchant/redeem/confirm/page.dart';
 import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
@@ -68,6 +69,10 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/Merchant/Coupon',
     builder: (context, state) => const MerchantCouponPage(),
+  ),
+  GoRoute(
+    path: '/Merchant/Partners',
+    builder: (context, state) => const MerchantPartnersPage(),
   ),
   GoRoute(
     path: '/Merchant/Redeem/Confirm',

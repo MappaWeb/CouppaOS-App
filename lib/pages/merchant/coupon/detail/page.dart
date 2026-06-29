@@ -32,9 +32,12 @@ class _Content extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: SystemDetailScaffold<MerchantCouponDetailBloc>(
-        appBar: AppBar(
+        scaffoldBackgroundColor: AppColors.white,
+        appBar: BaseAppBar(
+          context: context,
+          centerTitle: false,
           title: const Text('Chi tiết chiến dịch'),
-          actions: [_DetailMenu(id: id)],
+          // actions: [_DetailMenu(id: id)],
           bottom: const TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
             tabs: [
@@ -56,52 +59,52 @@ class _Content extends StatelessWidget {
   }
 }
 
-class _DetailMenu extends StatelessWidget {
-  const _DetailMenu({required this.id});
-
-  final String id;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocSelector<MerchantCouponDetailBloc, SystemDetailState, String>(
-      selector: (state) => (state.result['status'] ?? '').toString().toUpperCase(),
-      builder: (context, status) {
-        final canEdit = status != 'ACTIVE';
-        return PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert),
-          onSelected: (value) async {
-            if (value == 'edit') {
-              await appNavigator.pushNamed(
-                RouterConstants.merchantCouponForm,
-                arguments: {'id': id},
-              );
-              if (context.mounted) {
-                context.read<MerchantCouponDetailBloc>().add(RefreshBaseDetail());
-              }
-            }
-          },
-          itemBuilder: (_) => [
-            PopupMenuItem(
-              value: 'edit',
-              enabled: canEdit,
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.edit_outlined,
-                    size: 18,
-                    color: canEdit ? null : Palette.textPrimary3,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(canEdit ? 'Sửa' : 'Sửa (đang Active)'),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
+// class _DetailMenu extends StatelessWidget {
+//   const _DetailMenu({required this.id});
+//
+//   final String id;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return BlocSelector<MerchantCouponDetailBloc, SystemDetailState, String>(
+//       selector: (state) => (state.result['status'] ?? '').toString().toUpperCase(),
+//       builder: (context, status) {
+//         final canEdit = status != 'ACTIVE';
+//         return PopupMenuButton<String>(
+//           icon: const Icon(Icons.more_vert),
+//           onSelected: (value) async {
+//             if (value == 'edit') {
+//               await appNavigator.pushNamed(
+//                 RouterConstants.merchantCouponForm,
+//                 arguments: {'id': id},
+//               );
+//               if (context.mounted) {
+//                 context.read<MerchantCouponDetailBloc>().add(RefreshBaseDetail());
+//               }
+//             }
+//           },
+//           itemBuilder: (_) => [
+//             PopupMenuItem(
+//               value: 'edit',
+//               enabled: canEdit,
+//               child: Row(
+//                 children: [
+//                   Icon(
+//                     Icons.edit_outlined,
+//                     size: 18,
+//                     color: canEdit ? null : Palette.textPrimary3,
+//                   ),
+//                   const SizedBox(width: 8),
+//                   Text(canEdit ? 'Sửa' : 'Sửa (đang Active)'),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//   }
+// }
 
 // ============================================================
 // Tab 1 — Thông tin
@@ -150,10 +153,7 @@ class _InfoTab extends StatelessWidget {
               children: [
                 ItemBaseContent(
                   items: [
-                    ContentLineInfo(
-                      'Mệnh giá',
-                      _faceValue(data['faceValue']),
-                    ),
+                    ContentLineInfo('Mệnh giá', _faceValue(data['faceValue'])),
                     ContentLineInfo(
                       'Hình thức phát hành',
                       _issueMode((data['issueMode'] ?? '').toString()),
@@ -162,10 +162,7 @@ class _InfoTab extends StatelessWidget {
                       'Layout hiển thị',
                       _claimLayout((data['claimLayout'] ?? '').toString()),
                     ),
-                    ContentLineInfo(
-                      'Tổng số lượng',
-                      '${data['totalQuantity'] ?? 0}',
-                    ),
+                    ContentLineInfo('Tổng số lượng', '${data['totalQuantity'] ?? 0}'),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -183,20 +180,11 @@ class _InfoTab extends StatelessWidget {
               items: [
                 ContentLineInfo('Bắt đầu', date(data['validFrom'])),
                 ContentLineInfo('Kết thúc', date(data['validTo'])),
-                ContentLineInfo(
-                  'Ngày trong tuần',
-                  _daysOfWeek(data['usageDaysOfWeek']),
-                ),
+                ContentLineInfo('Ngày trong tuần', _daysOfWeek(data['usageDaysOfWeek'])),
                 if (data['usageDates'] is List && (data['usageDates'] as List).isNotEmpty)
-                  ContentLineInfo(
-                    'Ngày cụ thể',
-                    (data['usageDates'] as List).join(', '),
-                  ),
+                  ContentLineInfo('Ngày cụ thể', (data['usageDates'] as List).join(', ')),
                 if (data['usageWindows'] is List && (data['usageWindows'] as List).isNotEmpty)
-                  ContentLineInfo(
-                    'Khung giờ',
-                    _windows(data['usageWindows']),
-                  ),
+                  ContentLineInfo('Khung giờ', _windows(data['usageWindows'])),
               ],
             ),
           ),
@@ -205,30 +193,12 @@ class _InfoTab extends StatelessWidget {
             title: 'Giới hạn nhận',
             child: ItemBaseContent(
               items: [
-                ContentLineInfo(
-                  'Tối đa / người dùng',
-                  _limit(_int(data['maxPerUser'])),
-                ),
-                ContentLineInfo(
-                  'Tối đa / số điện thoại',
-                  _limit(_int(data['maxPerPhone'])),
-                ),
-                ContentLineInfo(
-                  'Tối đa / thiết bị',
-                  _limit(_int(data['maxPerDevice'])),
-                ),
-                ContentLineInfo(
-                  'Nhận qua web',
-                  _boolText(data['webClaimAllowed']),
-                ),
-                ContentLineInfo(
-                  'Yêu cầu OTP',
-                  _boolText(data['otpRequired']),
-                ),
-                ContentLineInfo(
-                  'Thời gian giữ chỗ',
-                  _reserveTtl(_int(data['reserveTtlSeconds'])),
-                ),
+                ContentLineInfo('Tối đa / người dùng', _limit(_int(data['maxPerUser']))),
+                ContentLineInfo('Tối đa / số điện thoại', _limit(_int(data['maxPerPhone']))),
+                ContentLineInfo('Tối đa / thiết bị', _limit(_int(data['maxPerDevice']))),
+                ContentLineInfo('Nhận qua web', _boolText(data['webClaimAllowed'])),
+                ContentLineInfo('Yêu cầu OTP', _boolText(data['otpRequired'])),
+                ContentLineInfo('Thời gian giữ chỗ', _reserveTtl(_int(data['reserveTtlSeconds']))),
               ],
             ),
           ),
@@ -275,10 +245,12 @@ class _InfoTab extends StatelessWidget {
 
   static String _windows(dynamic v) {
     if (v is! List) return '—';
-    return v.map((e) {
-      if (e is Map) return '${e['from'] ?? ''} - ${e['to'] ?? ''}';
-      return '$e';
-    }).join(', ');
+    return v
+        .map((e) {
+          if (e is Map) return '${e['from'] ?? ''} - ${e['to'] ?? ''}';
+          return '$e';
+        })
+        .join(', ');
   }
 
   static String _limit(int n) => n <= 0 ? 'Không giới hạn' : '$n lượt';
@@ -380,7 +352,11 @@ class _CodesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SystemListView<MerchantCouponDetailCodesBloc, SystemListState<Map>, Map>(
+      padding: .symmetric(vertical: 12),
       detailBuilder: (context, item, isSelected) => _CodeItem(item: item),
+      bottomSlivers: [
+        SliverToBoxAdapter(child: SizedBox(height: MediaQuery.paddingOf(context).bottom)),
+      ],
     );
   }
 }
@@ -396,7 +372,7 @@ class _CodeItem extends StatelessWidget {
     final status = (item['status'] ?? '').toString();
     final claimedBy = item['claimedBy']?.toString();
     final expiresAt = item['expiresAt'];
-    final qr = (item['qr'] ?? '').toString();
+    // final qr = (item['qr'] ?? '').toString();
     final expired = _isExpired(expiresAt);
 
     return Container(
@@ -457,12 +433,12 @@ class _CodeItem extends StatelessWidget {
               ],
             ),
           ),
-          if (qr.isNotEmpty)
-            IconButton(
-              tooltip: 'Xem mã QR',
-              icon: const Icon(Icons.qr_code_2, size: 28, color: Palette.primary),
-              onPressed: () => _showQrDialog(context, code: code, qrUrl: qr),
-            ),
+          // if (qr.isNotEmpty)
+          //   IconButton(
+          //     tooltip: 'Xem mã QR',
+          //     icon: const Icon(Icons.qr_code_2, size: 28, color: Palette.primary),
+          //     onPressed: () => _showQrDialog(context, code: code, qrUrl: qr),
+          //   ),
         ],
       ),
     );
@@ -476,59 +452,54 @@ class _CodeItem extends StatelessWidget {
   }
 }
 
-void _showQrDialog(BuildContext context, {required String code, required String qrUrl}) {
-  showDialog<void>(
-    context: context,
-    builder: (ctx) {
-      return AlertDialog(
-        contentPadding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              code,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.4,
-                color: Palette.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                qrUrl,
-                width: 240,
-                height: 240,
-                fit: BoxFit.contain,
-                loadingBuilder: (_, child, progress) {
-                  if (progress == null) return child;
-                  return const SizedBox(
-                    width: 240,
-                    height: 240,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                },
-                errorBuilder: (_, _, _) => const SizedBox(
-                  width: 240,
-                  height: 240,
-                  child: Center(
-                    child: Icon(Icons.broken_image_outlined, size: 48, color: Palette.textPrimary3),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Đóng'),
-          ),
-        ],
-      );
-    },
-  );
-}
+// void _showQrDialog(BuildContext context, {required String code, required String qrUrl}) {
+//   showDialog<void>(
+//     context: context,
+//     builder: (ctx) {
+//       return AlertDialog(
+//         contentPadding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+//         content: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Text(
+//               code,
+//               style: const TextStyle(
+//                 fontFamily: 'monospace',
+//                 fontSize: 16,
+//                 fontWeight: FontWeight.w700,
+//                 letterSpacing: 1.4,
+//                 color: Palette.textPrimary,
+//               ),
+//             ),
+//             const SizedBox(height: 12),
+//             ClipRRect(
+//               borderRadius: BorderRadius.circular(8),
+//               child: Image.network(
+//                 qrUrl,
+//                 width: 240,
+//                 height: 240,
+//                 fit: BoxFit.contain,
+//                 loadingBuilder: (_, child, progress) {
+//                   if (progress == null) return child;
+//                   return const SizedBox(
+//                     width: 240,
+//                     height: 240,
+//                     child: Center(child: CircularProgressIndicator()),
+//                   );
+//                 },
+//                 errorBuilder: (_, _, _) => const SizedBox(
+//                   width: 240,
+//                   height: 240,
+//                   child: Center(
+//                     child: Icon(Icons.broken_image_outlined, size: 48, color: Palette.textPrimary3),
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//         actions: [TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Đóng'))],
+//       );
+//     },
+//   );
+// }
