@@ -32,10 +32,6 @@ class _LoginView extends StatelessWidget {
     }
   }
 
-  void _comingSoon() {
-    showMessage('Tính năng đang phát triển', type: 'info');
-  }
-
   void _goRegister() {
     appNavigator.pushNamed(RouterConstants.register);
   }
@@ -70,11 +66,13 @@ class _LoginView extends StatelessWidget {
                       const SizedBox(height: 40),
                       const _Header(),
                       const _PhoneField(),
+                      const SizedBox(height: 12,),
                       const _PasswordField(),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: _comingSoon,
+                          onPressed: () => appNavigator
+                              .pushNamed(RouterConstants.forgotPassword),
                           style: TextButton.styleFrom(
                             foregroundColor: Palette.primary,
                             padding: const EdgeInsets.symmetric(
