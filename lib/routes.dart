@@ -20,73 +20,53 @@ import 'pages/user/coupon/detail/page.dart';
 import 'pages/user/coupon/page.dart';
 
 List<RouteBase> get routes => <RouteBase>[
-  GoRoute(
-    path: '/',
-    builder: (context, state) => const StartPage(),
-    redirect: StartPage.redirect,
-  ),
-  GoRoute(
-    path: '/Account',
-    builder: (context, state) => const AccountPage(),
-  ),
+  GoRoute(path: '/', builder: (context, state) => const StartPage(), redirect: StartPage.redirect),
+  GoRoute(path: '/Account', builder: (context, state) => const AccountPage()),
   GoRoute(
     path: '/BecomeMerchant/Location',
-    builder: (context, state) => BecomeMerchantLocationPage(state.uri.queryParameters.isNotEmpty
-    ? state.uri.queryParameters : state.extra as Map?),
+    builder: (context, state) => BecomeMerchantLocationPage(
+      state.uri.queryParameters.isNotEmpty ? state.uri.queryParameters : state.extra as Map?,
+    ),
   ),
-  GoRoute(
-    path: '/BecomeMerchant',
-    builder: (context, state) => const BecomeMerchantPage(),
-  ),
-  GoRoute(
-    path: '/Loading',
-    builder: (context, state) => const LoadingPage(),
-  ),
-  GoRoute(
-    path: '/Login',
-    builder: (context, state) => const LoginPage(),
-  ),
+  GoRoute(path: '/BecomeMerchant', builder: (context, state) => const BecomeMerchantPage()),
+  GoRoute(path: '/Loading', builder: (context, state) => const LoadingPage()),
+  GoRoute(path: '/Login', builder: (context, state) => const LoginPage()),
   GoRoute(
     path: '/Merchant/Coupon/Detail',
-    builder: (context, state) => MerchantCouponDetailPage(state.uri.queryParameters.isNotEmpty
-    ? state.uri.queryParameters : state.extra as Map?),
+    builder: (context, state) => MerchantCouponDetailPage(
+      state.uri.queryParameters.isNotEmpty
+          ? state.uri.queryParameters as String
+          : (state.extra as Map?)?['id'] ?? '',
+    ),
   ),
   GoRoute(
     path: '/Merchant/Coupon/Form',
-    builder: (context, state) => MerchantCouponFormPage(state.uri.queryParameters.isNotEmpty
-    ? state.uri.queryParameters : state.extra as Map?),
+    builder: (context, state) => MerchantCouponFormPage(
+      state.uri.queryParameters.isNotEmpty ? state.uri.queryParameters : state.extra as Map?,
+    ),
   ),
   GoRoute(
     path: '/Merchant/Coupon/Issue',
-    builder: (context, state) => MerchantCouponIssuePage(state.uri.queryParameters.isNotEmpty
-    ? state.uri.queryParameters : state.extra as Map?),
+    builder: (context, state) => MerchantCouponIssuePage(
+      state.uri.queryParameters.isNotEmpty ? state.uri.queryParameters : state.extra as Map?,
+    ),
   ),
-  GoRoute(
-    path: '/Merchant/Coupon',
-    builder: (context, state) => const MerchantCouponPage(),
-  ),
+  GoRoute(path: '/Merchant/Coupon', builder: (context, state) => const MerchantCouponPage()),
   GoRoute(
     path: '/Merchant/Redeem/Confirm',
-    builder: (context, state) => MerchantRedeemConfirmPage(state.uri.queryParameters.isNotEmpty
-    ? state.uri.queryParameters : state.extra as Map?),
+    builder: (context, state) => MerchantRedeemConfirmPage(
+      state.uri.queryParameters.isNotEmpty ? state.uri.queryParameters : state.extra as Map?,
+    ),
   ),
-  GoRoute(
-    path: '/Merchant/Redeem',
-    builder: (context, state) => const MerchantRedeemPage(),
-  ),
-  GoRoute(
-    path: '/Merchant/Report',
-    builder: (context, state) => const MerchantReportPage(),
-  ),
+  GoRoute(path: '/Merchant/Redeem', builder: (context, state) => const MerchantRedeemPage()),
+  GoRoute(path: '/Merchant/Report', builder: (context, state) => const MerchantReportPage()),
   GoRoute(
     path: '/Otp',
-    builder: (context, state) => OtpPage(state.uri.queryParameters.isNotEmpty
-    ? state.uri.queryParameters : state.extra as Map?),
+    builder: (context, state) => OtpPage(
+      state.uri.queryParameters.isNotEmpty ? state.uri.queryParameters : state.extra as Map?,
+    ),
   ),
-  GoRoute(
-    path: '/Register',
-    builder: (context, state) => const RegisterPage(),
-  ),
+  GoRoute(path: '/Register', builder: (context, state) => const RegisterPage()),
   GoRoute(
     path: '/Start',
     builder: (context, state) => const StartPage(),
@@ -99,11 +79,9 @@ List<RouteBase> get routes => <RouteBase>[
   ),
   GoRoute(
     path: '/User/Coupon/Detail',
-    builder: (context, state) => UserCouponDetailPage(state.uri.queryParameters.isNotEmpty
-    ? state.uri.queryParameters : state.extra as Map?),
+    builder: (context, state) => UserCouponDetailPage(
+      state.uri.queryParameters.isNotEmpty ? state.uri.queryParameters : state.extra as Map?,
+    ),
   ),
-  GoRoute(
-    path: '/User/Coupon',
-    builder: (context, state) => const UserCouponPage(),
-  ),
+  GoRoute(path: '/User/Coupon', builder: (context, state) => const UserCouponPage()),
 ];

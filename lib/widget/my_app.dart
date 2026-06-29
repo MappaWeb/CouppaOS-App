@@ -45,7 +45,7 @@ class _MyAppState extends State<MyApp> {
       case UserRole.merchant:
         return const [
           NavItem(
-            label: 'Quản lý Coupon',
+            label: 'Quản lý chiến dịch',
             path: '/Merchant/Coupon',
             icon: Icons.local_offer_outlined,
           ),

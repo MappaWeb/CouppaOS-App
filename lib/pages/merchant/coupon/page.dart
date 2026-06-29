@@ -38,7 +38,7 @@ class _MerchantCouponView extends StatelessWidget {
         SystemListState<VoucherModel>,
         VoucherModel>(
       appBar: AppBar(
-        title: const Text('Quản lý Coupon'),
+        title: const Text('Quản lý chiến dịch'),
         automaticallyImplyLeading: false,
       ),
       searchBarOption: SearchBarOption<
@@ -46,8 +46,9 @@ class _MerchantCouponView extends StatelessWidget {
           SystemListState<VoucherModel>,
           VoucherModel>(
         hintText: 'Tìm theo mã / tên',
-        counterKeys: _filterKeys,
+        // counterKeys: _filterKeys,
         extraFilters: (getFilter, onChanged) => Column(
+          spacing: 8,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             FieldSelect.dropdown(
