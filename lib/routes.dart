@@ -3,6 +3,7 @@ import 'package:core/core.dart' show RouteBase, GoRoute;
 import 'pages/account/page.dart';
 import 'pages/become_merchant/location/page.dart';
 import 'pages/become_merchant/page.dart';
+import 'pages/forgot_password/page.dart';
 import 'pages/loading/page.dart';
 import 'pages/login/page.dart';
 import 'pages/merchant/coupon/detail/page.dart';
@@ -37,6 +38,10 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/BecomeMerchant',
     builder: (context, state) => const BecomeMerchantPage(),
+  ),
+  GoRoute(
+    path: '/ForgotPassword',
+    builder: (context, state) => const ForgotPasswordPage(),
   ),
   GoRoute(
     path: '/Loading',

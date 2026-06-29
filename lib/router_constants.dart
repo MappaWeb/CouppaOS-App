@@ -2,6 +2,7 @@
 import 'pages/account/page.dart';
 import 'pages/become_merchant/location/page.dart';
 import 'pages/become_merchant/page.dart';
+import 'pages/forgot_password/page.dart';
 import 'pages/loading/page.dart';
 import 'pages/login/page.dart';
 import 'pages/merchant/coupon/detail/page.dart';
@@ -29,6 +30,9 @@ class RouterConstants {
 
   ///Router to [BecomeMerchantPage]
   static String get becomeMerchant => '/BecomeMerchant';
+
+  ///Router to [ForgotPasswordPage]
+  static String get forgotPassword => '/ForgotPassword';
 
   ///Router to [LoadingPage]
   static String get loading => '/Loading';
