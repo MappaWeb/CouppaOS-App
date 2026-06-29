@@ -16,5 +16,5 @@ class Palette {
   static const blueTxtColor = Color(0xFF155DFC);
   static const redTxtColor = Color(0xFFE7000B);
   static const redCloseTxtColor = Color(0xFFFB2C36);
-  static const borderColor = Color(0xFF6A7282);
+  static const borderColor = Color(0xFFEEEEEE);
 }

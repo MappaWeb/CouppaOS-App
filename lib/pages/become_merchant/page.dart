@@ -26,14 +26,18 @@ class _BecomeMerchantView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SystemFormScaffold<BecomeMerchantBloc, SystemFormState>(
-      appBarBuilder: (context, state) => AppBar(title: const Text('Trở thành cửa hàng')),
+      appBarBuilder: (context, state) =>
+          BaseAppBar(title: const Text('Trở thành cửa hàng'), context: context),
+      scaffoldBackgroundColor: Palette.cardColor,
       bottomNavigationBar: (context, state, submitBtn) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: FilledButton(
             onPressed: state.isSubmitting
                 ? null
-                : () => context.read<BecomeMerchantBloc>().add(SubmitSystemForm()),
+                : () => context.read<BecomeMerchantBloc>().add(
+                    SubmitSystemForm(),
+                  ),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: Text(state.isSubmitting ? 'Đang gửi...' : 'Gửi đăng ký'),
@@ -53,7 +57,7 @@ class _BecomeMerchantView extends StatelessWidget {
             }
           },
           child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             children: [
               _sectionTitle('Thông tin pháp nhân'),
               wrapper<String>(
@@ -66,6 +70,7 @@ class _BecomeMerchantView extends StatelessWidget {
                   onChanged: onChanged,
                 ),
               ),
+              const SizedBox(height: 12),
               wrapper<String>(
                 'taxCode',
                 builder: (context, data, onChanged) => FieldText(
@@ -78,7 +83,6 @@ class _BecomeMerchantView extends StatelessWidget {
                   onChanged: onChanged,
                 ),
               ),
-              const SizedBox(height: 8),
               _sectionTitle('Thông tin cửa hàng'),
               wrapper<String>(
                 'storeName',
@@ -90,6 +94,7 @@ class _BecomeMerchantView extends StatelessWidget {
                   onChanged: onChanged,
                 ),
               ),
+              const SizedBox(height: 12),
               wrapper<String>(
                 'address',
                 builder: (context, data, onChanged) => FieldText(
@@ -101,6 +106,7 @@ class _BecomeMerchantView extends StatelessWidget {
                   onChanged: onChanged,
                 ),
               ),
+              const SizedBox(height: 12),
               wrapper<String>(
                 'phone',
                 builder: (context, data, onChanged) => FieldText(
@@ -121,7 +127,6 @@ class _BecomeMerchantView extends StatelessWidget {
                   onListChanged: onChanged,
                 ),
               ),
-              const SizedBox(height: 24),
             ],
           ),
         );
@@ -130,7 +135,7 @@ class _BecomeMerchantView extends StatelessWidget {
   }
 
   Widget _sectionTitle(String text) => Padding(
-    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+    padding: const EdgeInsets.fromLTRB(0, 12, 0, 4),
     child: Text(
       text,
       style: const TextStyle(
@@ -163,24 +168,29 @@ class _LocationField extends StatelessWidget {
             : 'Chưa chọn vị trí';
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InkWell(
                 onTap: () => _pickLocation(context, bloc, lat, lng),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: locationError != null ? Palette.redTxtColor : Palette.borderColor,
+                      color: locationError != null
+                          ? Palette.redTxtColor
+                          : Palette.textPrimary3,
                     ),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.location_on_outlined, color: Palette.primary),
+                      const Icon(
+                        Icons.location_on_outlined,
+                        color: Palette.primary,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -188,7 +198,10 @@ class _LocationField extends StatelessWidget {
                           children: [
                             const Text(
                               'Vị trí cửa hàng *',
-                              style: TextStyle(fontSize: 13, color: Palette.textPrimary4),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Palette.textPrimary4,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(subtitle),
@@ -205,7 +218,10 @@ class _LocationField extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 6, left: 4),
                   child: Text(
                     locationError,
-                    style: const TextStyle(color: Palette.redTxtColor, fontSize: 12),
+                    style: const TextStyle(
+                      color: Palette.redTxtColor,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
             ],
