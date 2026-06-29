@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:ui';
 
 import '../../../import.dart';
 import 'bloc.dart';
@@ -15,10 +15,7 @@ class MerchantPartnersPage extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => MerchantPartnersBloc()),
         BlocProvider(create: (_) => MerchantLinksBloc()),
-        BlocProvider(
-          create: (ctx) =>
-              PartnerActionCubit(apiClient: ctx.read<ApiClient>()),
-        ),
+        BlocProvider(create: (ctx) => PartnerActionCubit(apiClient: ctx.read<ApiClient>())),
       ],
       child: const _MerchantPartnersView(),
     );
@@ -81,12 +78,7 @@ class _MerchantPartnersView extends StatelessWidget {
               ],
             ),
           ),
-          body: const TabBarView(
-            children: [
-              _PartnersTab(),
-              _LinksTab(),
-            ],
-          ),
+          body: const TabBarView(children: [_PartnersTab(), _LinksTab()]),
           floatingActionButton: FloatingActionButton.extended(
             backgroundColor: Palette.primary,
             foregroundColor: Colors.white,
@@ -107,43 +99,15 @@ class _MerchantPartnersView extends StatelessWidget {
 class _PartnersTab extends StatelessWidget {
   const _PartnersTab();
 
-  Future<void> _onRefresh(BuildContext context) {
-    final completer = Completer<void>();
-    context.read<MerchantPartnersBloc>().add(
-      RefreshBaseList(clearItems: false, completer: completer),
-    );
-    return completer.future;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MerchantPartnersBloc, SystemListState<Map>>(
-      builder: (context, state) {
-        if (state.showLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (state.isFail) {
-          return _ErrorView(
-            message: state.message ?? 'Có lỗi xảy ra',
-            onRetry: () => context.read<MerchantPartnersBloc>().add(
-              RefreshBaseList(clearItems: true),
-            ),
-          );
-        }
-        final items = state.items.map((e) => e.value).toList();
-        return RefreshIndicator(
-          onRefresh: () => _onRefresh(context),
-          child: items.isEmpty
-              ? const _EmptyView(message: 'Chưa có đối tác nào liên kết.')
-              : ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-                  itemCount: items.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (_, i) => PartnerItem(items[i]),
-                ),
-        );
+    return SystemListView<MerchantPartnersBloc, SystemListState<Map>, Map>(
+      detailBuilder: (context, item, isSelected) {
+        return PartnerItem(item);
       },
+      bottomSlivers: [
+        SliverToBoxAdapter(child: SizedBox(height: MediaQuery.paddingOf(context).bottom)),
+      ],
     );
   }
 }
@@ -155,19 +119,7 @@ class _PartnersTab extends StatelessWidget {
 class _LinksTab extends StatelessWidget {
   const _LinksTab();
 
-  Future<void> _onRefresh(BuildContext context) {
-    final completer = Completer<void>();
-    context.read<MerchantLinksBloc>().add(
-      RefreshBaseList(clearItems: false, completer: completer),
-    );
-    return completer.future;
-  }
-
-  Future<void> _respond(
-    BuildContext context,
-    Map link, {
-    required bool accept,
-  }) async {
+  Future<void> _respond(BuildContext context, Map link, {required bool accept}) async {
     final name = (link['merchantName'] ?? '') as String;
     final id = (link['id'] ?? '') as String;
     if (id.isEmpty) return;
@@ -175,9 +127,7 @@ class _LinksTab extends StatelessWidget {
     await AppDialogs.showConfirmDialog(
       context: context,
       title: accept ? 'Duyệt yêu cầu' : 'Từ chối yêu cầu',
-      message: accept
-          ? 'Đồng ý liên kết với "$name"?'
-          : 'Từ chối yêu cầu liên kết từ "$name"?',
+      message: accept ? 'Đồng ý liên kết với "$name"?' : 'Từ chối yêu cầu liên kết từ "$name"?',
       textConfirm: accept ? 'Duyệt' : 'Từ chối',
       textCancel: 'Huỷ',
       onConfirm: () {
@@ -190,114 +140,34 @@ class _LinksTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MerchantLinksBloc, SystemListState<Map>>(
-      builder: (context, state) {
-        if (state.showLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (state.isFail) {
-          return _ErrorView(
-            message: state.message ?? 'Có lỗi xảy ra',
-            onRetry: () => context.read<MerchantLinksBloc>().add(
-              RefreshBaseList(clearItems: true),
-            ),
-          );
-        }
-        final items = state.items.map((e) => e.value).toList();
-        return BlocBuilder<PartnerActionCubit, PartnerActionState>(
-          buildWhen: (p, c) => p.isSubmitting != c.isSubmitting,
-          builder: (context, actionState) {
-            return RefreshIndicator(
-              onRefresh: () => _onRefresh(context),
-              child: items.isEmpty
-                  ? const _EmptyView(
-                      message: 'Chưa có yêu cầu liên kết nào.',
-                    )
-                  : ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-                      itemCount: items.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
-                      itemBuilder: (_, i) {
-                        final link = items[i];
-                        return LinkItem(
-                          link,
-                          isBusy: actionState.isSubmitting,
-                          onAccept: () =>
-                              _respond(context, link, accept: true),
-                          onReject: () =>
-                              _respond(context, link, accept: false),
-                        );
-                      },
-                    ),
+    final isSubmitting = context.read<PartnerActionCubit>().state.isSubmitting;
+    return Stack(
+      children: [
+        SystemListView<MerchantLinksBloc, SystemListState<Map>, Map>(
+          detailBuilder: (context, item, isSelected) {
+            return LinkItem(
+              item,
+              onAccept: () => _respond(context, item, accept: true),
+              onReject: () => _respond(context, item, accept: false),
             );
           },
-        );
-      },
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// Shared sub-widgets
-// ═══════════════════════════════════════════════════════════════════
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
-          child: Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Palette.textPrimary4),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              color: Palette.textPrimary4,
-              size: 40,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Palette.textPrimary4),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Thử lại'),
-            ),
+          bottomSlivers: [
+            SliverToBoxAdapter(child: SizedBox(height: MediaQuery.paddingOf(context).bottom)),
           ],
         ),
-      ),
+        if (isSubmitting)
+          Positioned.fill(
+            child: Stack(
+              children: [
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                  child: Container(color: Colors.black.withValues(alpha: 0.2)),
+                ),
+                const Center(child: CircularProgressIndicator()),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
