@@ -16,7 +16,6 @@ import 'pages/merchant/report/page.dart';
 import 'pages/otp/page.dart';
 import 'pages/register/page.dart';
 import 'pages/start/page.dart';
-import 'pages/start/without_login/page.dart';
 import 'pages/user/coupon/detail/page.dart';
 import 'pages/user/coupon/page.dart';
 
@@ -96,11 +95,6 @@ List<RouteBase> get routes => <RouteBase>[
     path: '/Start',
     builder: (context, state) => const StartPage(),
     redirect: StartPage.redirect,
-  ),
-  GoRoute(
-    path: '/Start/WithoutLogin',
-    builder: (context, state) => const StartWithoutLoginPage(),
-    redirect: StartWithoutLoginPage.redirect,
   ),
   GoRoute(
     path: '/User/Coupon/Detail',

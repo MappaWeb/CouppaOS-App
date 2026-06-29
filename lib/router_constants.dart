@@ -15,7 +15,6 @@ import 'pages/merchant/report/page.dart';
 import 'pages/otp/page.dart';
 import 'pages/register/page.dart';
 import 'pages/start/page.dart';
-import 'pages/start/without_login/page.dart';
 import 'pages/user/coupon/detail/page.dart';
 import 'pages/user/coupon/page.dart';
 class RouterConstants {
@@ -69,9 +68,6 @@ class RouterConstants {
 
   ///Router to [StartPage]
   static String get start => '/Start';
-
-  ///Router to [StartWithoutLoginPage]
-  static String get startWithoutLogin => '/Start/WithoutLogin';
 
   ///Router to [UserCouponDetailPage]
   static String get userCouponDetail => '/User/Coupon/Detail';

@@ -45,7 +45,7 @@ class _LoginView extends StatelessWidget {
             p.errorMessage != c.errorMessage && c.errorMessage != null,
         listener: (_, s) => showMessage(s.errorMessage!, type: 'error'),
         child: GestureDetector(
-          onTap: (){
+          onTap: () {
             FocusManager.instance.primaryFocus?.unfocus();
           },
           child: SafeArea(
@@ -65,14 +65,16 @@ class _LoginView extends StatelessWidget {
                       const _Brand(),
                       const SizedBox(height: 40),
                       const _Header(),
+                      const SizedBox(height: 12),
                       const _PhoneField(),
-                      const SizedBox(height: 12,),
+                      const SizedBox(height: 12),
                       const _PasswordField(),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () => appNavigator
-                              .pushNamed(RouterConstants.forgotPassword),
+                          onPressed: () => appNavigator.pushNamed(
+                            RouterConstants.forgotPassword,
+                          ),
                           style: TextButton.styleFrom(
                             foregroundColor: Palette.primary,
                             padding: const EdgeInsets.symmetric(
@@ -157,7 +159,7 @@ class _Header extends StatelessWidget {
             letterSpacing: -0.4,
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 12),
         Text(
           'Đăng nhập để săn coupon và tiết kiệm thông minh.',
           style: TextStyle(
