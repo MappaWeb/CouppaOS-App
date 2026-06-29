@@ -7,6 +7,7 @@ export 'package:couppa_mini/gen/assets.gen.dart';
 export 'package:couppa_mini/l10n/app_localizations.dart';
 export 'package:couppa_mini/utils/palette.dart';
 
+export 'api/app_api.dart';
 export 'data/cache/cache.dart';
 export 'global.dart';
 export 'l10n/l10n_helper.dart';

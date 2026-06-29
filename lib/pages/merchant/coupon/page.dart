@@ -1,5 +1,7 @@
 import '../../../import.dart';
 import 'bloc.dart';
+import 'model.dart';
+import 'widgets/item.dart';
 
 class MerchantCouponPage extends StatelessWidget {
   const MerchantCouponPage({super.key});
@@ -7,7 +9,7 @@ class MerchantCouponPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MerchantCouponCubit()..load(),
+      create: (_) => MerchantCouponListBloc(),
       child: const _MerchantCouponView(),
     );
   }
@@ -16,78 +18,77 @@ class MerchantCouponPage extends StatelessWidget {
 class _MerchantCouponView extends StatelessWidget {
   const _MerchantCouponView();
 
+  static const _usedItems = [
+    {'id': 'unused', 'title': 'Chưa dùng'},
+    {'id': 'used', 'title': 'Đã dùng'},
+  ];
+
+  static const _filterKeys = [
+    'used',
+    'redeemFrom',
+    'redeemTo',
+    'issueFrom',
+    'issueTo',
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SystemListScaffold<
+        MerchantCouponListBloc,
+        SystemListState<VoucherModel>,
+        VoucherModel>(
       appBar: AppBar(
         title: const Text('Quản lý Coupon'),
         automaticallyImplyLeading: false,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => appNavigator.pushNamed('/Merchant/Coupon/Form'),
-        icon: const Icon(Icons.add),
-        label: const Text('Thêm coupon'),
+      searchBarOption: SearchBarOption<
+          MerchantCouponListBloc,
+          SystemListState<VoucherModel>,
+          VoucherModel>(
+        hintText: 'Tìm theo mã / tên',
+        counterKeys: _filterKeys,
+        extraFilters: (getFilter, onChanged) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FieldSelect.dropdown(
+              labelText: 'Trạng thái sử dụng',
+              items: _usedItems,
+              value: getFilter('used') as String?,
+              onChanged: (v) => onChanged<String>('used', v as String?),
+            ),
+            FieldDate(
+              labelText: 'Phát hành từ',
+              dateFormat: 'yyyy-MM-dd',
+              value: getFilter('issueFrom') as String?,
+              onChanged: (v) => onChanged<String>('issueFrom', v),
+            ),
+            FieldDate(
+              labelText: 'Phát hành đến',
+              dateFormat: 'yyyy-MM-dd',
+              value: getFilter('issueTo') as String?,
+              onChanged: (v) => onChanged<String>('issueTo', v),
+            ),
+            FieldDate(
+              labelText: 'Sử dụng từ',
+              dateFormat: 'yyyy-MM-dd',
+              value: getFilter('redeemFrom') as String?,
+              onChanged: (v) => onChanged<String>('redeemFrom', v),
+            ),
+            FieldDate(
+              labelText: 'Sử dụng đến',
+              dateFormat: 'yyyy-MM-dd',
+              value: getFilter('redeemTo') as String?,
+              onChanged: (v) => onChanged<String>('redeemTo', v),
+            ),
+          ],
+        ),
       ),
-      body: BlocBuilder<MerchantCouponCubit, MerchantCouponState>(
-        builder: (context, state) {
-          if (state.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state.items.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'Chưa có coupon.\nTODO: hiển thị danh sách coupon do merchant tạo.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Palette.textPrimary4),
-                ),
-              ),
-            );
-          }
-          return ListView.separated(
-            itemCount: state.items.length,
-            separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, i) {
-              final coupon = state.items[i];
-              return ListTile(
-                leading: const Icon(Icons.local_offer, color: Palette.primary),
-                title: Text(coupon.title),
-                subtitle: Text(
-                  'Đã phát: ${coupon.totalIssued} • Đã dùng: ${coupon.totalUsed}',
-                ),
-                trailing: PopupMenuButton<String>(
-                  onSelected: (value) {
-                    switch (value) {
-                      case 'edit':
-                        appNavigator.pushNamed(
-                          '/Merchant/Coupon/Form',
-                          arguments: {'id': coupon.id},
-                        );
-                      case 'issue':
-                        appNavigator.pushNamed(
-                          '/Merchant/Coupon/Issue',
-                          arguments: {'id': coupon.id},
-                        );
-                      case 'delete':
-                        context.read<MerchantCouponCubit>().delete(coupon.id);
-                    }
-                  },
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'edit', child: Text('Sửa')),
-                    PopupMenuItem(value: 'issue', child: Text('Phát hành')),
-                    PopupMenuItem(value: 'delete', child: Text('Xoá')),
-                  ],
-                ),
-                onTap: () => appNavigator.pushNamed(
-                  '/Merchant/Coupon/Detail',
-                  arguments: {'id': coupon.id},
-                ),
-              );
-            },
-          );
-        },
+      separatorBuilder: (_, _) => const Divider(
+        height: 1,
+        color: Palette.dividerColor,
       ),
+      detailBuilder: (context, item, isSelected) =>
+          MerchantCouponListItem(item),
     );
   }
 }

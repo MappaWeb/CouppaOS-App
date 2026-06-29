@@ -41,9 +41,8 @@ class RegisterState {
 }
 
 class RegisterCubit extends Cubit<RegisterState> {
-  RegisterCubit({required ApiClient apiClient})
-      : _apiClient = apiClient,
-        super(const RegisterState());
+  RegisterCubit({required this._apiClient})
+      : super(const RegisterState());
 
   final ApiClient _apiClient;
 
