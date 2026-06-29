@@ -36,19 +36,6 @@ UserRole getRole() {
   return getAccountRole();
 }
 
-enum CouponStatus { active, used, expired }
-
-String couponStatusLabel(CouponStatus status) {
-  switch (status) {
-    case CouponStatus.active:
-      return 'Còn hạn';
-    case CouponStatus.used:
-      return 'Đã dùng';
-    case CouponStatus.expired:
-      return 'Hết hạn';
-  }
-}
-
 bool isInputEmail(String value) {
   return RegExp(r'[a-zA-Z@]').hasMatch(value);
 }

@@ -9,7 +9,7 @@ class StartPage extends StatelessWidget {
       return null;
     }
     if (!AuthGuard.instance.isAuthenticated) {
-      return '/Start/WithoutLogin';
+      return RouterConstants.login;
     }
     return null;
   }

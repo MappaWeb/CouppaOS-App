@@ -81,7 +81,7 @@ class AccountPage extends StatelessWidget {
             onTap: () {
               resetViewMode();
               AuthSetup.instance.authSessionBloc.add(const LoggedOut());
-              appNavigator.go('/Start/WithoutLogin');
+              appNavigator.go(RouterConstants.login);
             },
           ),
         ],

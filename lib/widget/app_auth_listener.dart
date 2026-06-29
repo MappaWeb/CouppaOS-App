@@ -23,7 +23,7 @@ class _AppAuthListenerState extends State<AppAuthListener> {
       // 1) Bootstrap xong: chuyển session đã cache (nếu có) vào AuthSessionBloc,
       //    để chính BlocListener<AuthSessionBloc> bên dưới lo việc điều hướng.
       //    Nếu không có session → đánh dấu chưa login để StartPage redirect
-      //    sang /Start/WithoutLogin.
+      //    thẳng sang /Login.
       BlocListener<BootstrapBloc, BootstrapState>(
         listenWhen: (_, next) => next is BootstrapReady,
         listener: (context, state) {
