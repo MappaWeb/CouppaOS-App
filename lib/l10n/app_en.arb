@@ -233,6 +233,37 @@
       }
     }
   },
+  "@voucherClaim_summary": {
+    "description": "Result snackbar after a batch of voucher claims",
+    "placeholders": {
+      "success": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "@voucherClaim_dialogSuccessMessage": {
+    "description": "Success dialog body when a single voucher was claimed",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "G88PZFVUEV"
+      }
+    }
+  },
+  "@voucherClaim_dialogFailMessage": {
+    "description": "Failure dialog body when a single voucher could not be claimed",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "G88PZFVUEV"
+      }
+    }
+  },
   "account": "Account",
   "accountExisted": "{account} already exists",
   "accountInformation": "AccountInformation",
@@ -548,6 +579,26 @@
   "notifications": "Notifications",
   "redeemAlerts": "Redeem alerts",
   "linkRequests": "Link requests",
+  "promoAlerts": "Promotional updates",
+  "promoAlertsDescription": "Get notified about new promotions and vouchers.",
+  "voucherExpiryAlerts": "Voucher expiring soon",
+  "voucherExpiryAlertsDescription": "Get alerted when your vouchers are about to expire.",
+  "voucherClaim_title": "Receive voucher",
+  "voucherClaim_navLabel": "Receive",
+  "voucherClaim_modeManual": "Enter code",
+  "voucherClaim_modeQr": "Scan QR",
+  "voucherClaim_inputLabel": "Voucher codes",
+  "voucherClaim_inputHint": "Enter one or more codes separated by comma, space or newline",
+  "voucherClaim_submit": "Receive voucher",
+  "voucherClaim_summary": "Received {success}/{total} vouchers",
+  "voucherClaim_dialogSuccess": "Voucher received",
+  "voucherClaim_dialogFail": "Invalid code",
+  "voucherClaim_dialogSuccessMessage": "Voucher with code {code} has been added to your collection.",
+  "voucherClaim_dialogFailMessage": "Code {code} is invalid or no longer available.",
+  "voucherClaim_continueScan": "Continue scanning",
+  "voucherClaim_cancel": "Cancel",
+  "voucherClaim_scanHint": "Place the voucher QR code inside the frame",
+  "voucherClaim_scanPaused": "Scanner paused",
   "occurrenceTime": "Time of occurrence",
   "offenderHint": "Enter the offender’s opinion (if any)...",
   "offenderOpinion": "Offender's opinion",

@@ -6,25 +6,23 @@ class LoadingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Palette.primary ,Color(0xffffffff)]),
-        ),
+      backgroundColor: Colors.white,
+      body: SizedBox(
         width: .infinity,
         child: Column(
           mainAxisAlignment: .center,
           crossAxisAlignment: .center,
           children: [
-            const Icon(Icons.local_offer, size: 96, color: Colors.white),
+            const Icon(Icons.local_offer, size: 96, color: Palette.primary),
             const SizedBox(height: 16),
             const Text(
               'Couppa Mini',
-              style: TextStyle(fontWeight: .w700, fontSize: 40, color: Colors.white),
+              style: TextStyle(fontWeight: .w700, fontSize: 40, color: Palette.primary),
             ),
 
             Text(
               'Săn coupon - Tiết kiệm thông minh',
-              style: const TextStyle(fontWeight: .w400, fontSize: 18, color: Colors.white),
+              style: const TextStyle(fontWeight: .w400, fontSize: 18, color: Palette.primary),
             ),
             const SizedBox(height: 60),
 
@@ -48,15 +46,15 @@ class LoadingPage extends StatelessWidget {
                             return LinearProgressIndicator(
                               value: animatedValue,
                               minHeight: 10,
-                              backgroundColor: const Color(0xffFFFFFF).withValues(alpha: 0.3),
-                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                              backgroundColor: Palette.primary.withValues(alpha: 0.15),
+                              valueColor: const AlwaysStoppedAnimation<Color>(Palette.primary),
                             );
                           },
                         ),
                       ),
                       Text(
                         '${parseInt(percentLoading)} %',
-                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: .w400),
+                        style: const TextStyle(color: Palette.primary, fontSize: 14, fontWeight: .w400),
                       ),
                     ],
                   ),

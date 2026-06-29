@@ -41,22 +41,25 @@ class _NotificationPreferencesView extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.cardColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                clipBehavior: Clip.antiAlias,
                 child: Column(
                   children: [
                     _PreferenceRow(
-                      label: context.l10n.redeemAlerts,
-                      value: prefs.redeemAlerts,
+                      title: context.l10n.promoAlerts,
+                      subtitle: context.l10n.promoAlertsDescription,
+                      value: prefs.promoAlerts,
                       enabled: !state.isSaving,
-                      onChanged: cubit.setRedeemAlerts,
+                      onChanged: cubit.setPromoAlerts,
                     ),
-                    const Divider(height: 1),
+                    const Divider(height: 1, color: Palette.dividerColor),
                     _PreferenceRow(
-                      label: context.l10n.linkRequests,
-                      value: prefs.linkRequests,
+                      title: context.l10n.voucherExpiryAlerts,
+                      subtitle: context.l10n.voucherExpiryAlertsDescription,
+                      value: prefs.voucherExpiryAlerts,
                       enabled: !state.isSaving,
-                      onChanged: cubit.setLinkRequests,
+                      onChanged: cubit.setVoucherExpiryAlerts,
                     ),
                   ],
                 ),
@@ -71,13 +74,15 @@ class _NotificationPreferencesView extends StatelessWidget {
 
 class _PreferenceRow extends StatelessWidget {
   const _PreferenceRow({
-    required this.label,
+    required this.title,
+    required this.subtitle,
     required this.value,
     required this.enabled,
     required this.onChanged,
   });
 
-  final String label;
+  final String title;
+  final String subtitle;
   final bool value;
   final bool enabled;
   final ValueChanged<bool> onChanged;
@@ -85,19 +90,35 @@ class _PreferenceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Palette.textPrimary,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Palette.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Palette.textPrimary3,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
+          const SizedBox(width: 12),
           FieldSwitch(
             value: value,
             enabled: enabled,

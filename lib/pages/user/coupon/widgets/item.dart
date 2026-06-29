@@ -20,7 +20,6 @@ class UserCouponListItem extends StatelessWidget {
       showMultiActions: false,
       backgroundColor: Palette.cardColor,
       borderRadius: BorderRadius.circular(12),
-      side: const BorderSide(color: Color(0xFFEEEEEE)),
       leading: const Padding(
         padding: EdgeInsets.only(top: 2),
         child: Icon(
@@ -40,18 +39,6 @@ class UserCouponListItem extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   color: Palette.textPrimary3,
-                ),
-              ),
-            if (item.code.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  item.code,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontFamily: 'monospace',
-                    color: Palette.textPrimary4,
-                  ),
                 ),
               ),
             Padding(

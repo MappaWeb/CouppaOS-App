@@ -26,7 +26,8 @@ class _UserCouponView extends StatelessWidget {
       length: 2,
       child: Scaffold(
         backgroundColor: Palette.cardColor,
-        appBar: AppBar(
+        appBar: BaseAppBar(
+          context: context,
           title: const Text('Coupon của tôi'),
           automaticallyImplyLeading: false,
           bottom: const TabBar(
@@ -129,7 +130,7 @@ class _CouponList extends StatelessWidget {
             item,
             onTap: () => appNavigator.pushNamed(
               RouterConstants.userCouponDetail,
-              arguments: {'id': item.voucherCodeId},
+              arguments: item.toJson(),
             ),
           );
         },

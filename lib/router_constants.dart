@@ -1,7 +1,9 @@
 
 import 'pages/account/page.dart';
+import 'pages/account/profile/page.dart';
 import 'pages/become_merchant/location/page.dart';
 import 'pages/become_merchant/page.dart';
+import 'pages/change_password/page.dart';
 import 'pages/forgot_password/page.dart';
 import 'pages/loading/page.dart';
 import 'pages/login/page.dart';
@@ -19,6 +21,7 @@ import 'pages/register/page.dart';
 import 'pages/start/page.dart';
 import 'pages/user/coupon/detail/page.dart';
 import 'pages/user/coupon/page.dart';
+import 'pages/user/voucher_claim/page.dart';
 class RouterConstants {
   const RouterConstants._();
   static String get root => '/';
@@ -26,11 +29,17 @@ class RouterConstants {
   ///Router to [AccountPage]
   static String get account => '/Account';
 
+  ///Router to [AccountProfilePage]
+  static String get accountProfile => '/Account/Profile';
+
   ///Router to [BecomeMerchantLocationPage]
   static String get becomeMerchantLocation => '/BecomeMerchant/Location';
 
   ///Router to [BecomeMerchantPage]
   static String get becomeMerchant => '/BecomeMerchant';
+
+  ///Router to [ChangePasswordPage]
+  static String get changePassword => '/ChangePassword';
 
   ///Router to [ForgotPasswordPage]
   static String get forgotPassword => '/ForgotPassword';
@@ -82,4 +91,7 @@ class RouterConstants {
 
   ///Router to [UserCouponPage]
   static String get userCoupon => '/User/Coupon';
+
+  ///Router to [UserVoucherClaimPage]
+  static String get userVoucherClaim => '/User/VoucherClaim';
 }

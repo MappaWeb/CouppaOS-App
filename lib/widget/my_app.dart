@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/services.dart';
+import 'package:glass_bottom_navigation/glass_bottom_navigation.dart';
 
 import '../import.dart';
 
@@ -35,6 +36,11 @@ class _MyAppState extends State<MyApp> {
             label: 'Coupon của tôi',
             path: '/User/Coupon',
             icon: Icons.confirmation_number_outlined,
+          ),
+          NavItem(
+            label: 'Nhận voucher',
+            path: '/User/VoucherClaim',
+            icon: Icons.redeem_outlined,
           ),
           NavItem(
             label: 'Tài khoản',
@@ -93,30 +99,37 @@ class _MyAppState extends State<MyApp> {
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.white,
+        systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
+        extendBody: true,
         body: widget.child,
         bottomNavigationBar: MediaQuery.of(context).viewInsets.bottom > 0
             ? const SizedBox.shrink()
-            : DecoratedBox(
-                decoration: const BoxDecoration(
-                  border: Border(top: BorderSide(color: Color(0xFFEAECF0))),
-                ),
-                child: BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                  currentIndex: currentIndex,
-                  onTap: (index) => appNavigator.go(currentPaths[index]),
-                  selectedItemColor: Palette.primary,
-                  unselectedItemColor: Palette.textPrimary4,
-                  items: [
-                    for (final item in navItems)
-                      BottomNavigationBarItem(
-                        icon: Icon(item.icon),
-                        label: item.label,
-                      ),
-                  ],
+            : SafeArea(
+                minimum: const EdgeInsets.only(bottom: 12),
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: GlassBottomBar(
+                    items: [
+                      for (final item in navItems)
+                        GlassBarItem(
+                          icon: item.icon,
+                          label: item.label,
+                        ),
+                    ],
+                    currentIndex: currentIndex,
+                    onTap: (index) => appNavigator.go(currentPaths[index]),
+                    style: const GlassBottomNavStyle(
+                      accent: Palette.primary,
+                      pillTint: Color(0xFFDDDDDD),
+                      pillFilmStart: 0.72,
+                      pillFilmEnd: 0.52,
+                      pillBorderOpacity: 0.22,
+                      backdropSaturation: 1.2,
+                    ),
+                  ),
                 ),
               ),
       ),

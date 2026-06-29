@@ -12,17 +12,19 @@
 ## Mục lục
 
 1. [State management — ưu tiên System*Bloc của AppCore](#1-state-management)
-2. [Cấu trúc thư mục Feature](#2-cấu-trúc-thư-mục-feature)
-3. [Routing — auto-gen từ `tool/gen_router.dart`](#3-routing--auto-gen)
-4. [Navigation pattern](#4-navigation-pattern)
-5. [Imports — luôn qua `import.dart`](#5-imports)
-6. [Form Fields — ưu tiên `Field*` widgets](#6-form-fields)
-7. [Scaffolds — `System*Scaffold` + unfocus form](#7-scaffolds--unfocus)
-8. [AppBar — ưu tiên `BaseAppBar`](#8-appbar)
-9. [List item conventions — `ItemBase`, spacing, radius](#9-list-item-conventions)
-10. [Design language — Modern · Minimal · Premium](#10-design-language)
-11. [Widget tái sử dụng — khi nào tách ra `lib/widget/`](#11-widget-tái-sử-dụng)
-12. [Checklist PR](#12-checklist-pr)
+2. [Gọi API trực tiếp trong Bloc (ad-hoc, ngoài System*Bloc)](#2-gọi-api-trực-tiếp-trong-bloc)
+3. [App tự config API/AuthSetup — AppCore chỉ là fallback sample](#3-app-tự-config-apiauthsetup)
+4. [Cấu trúc thư mục Feature](#4-cấu-trúc-thư-mục-feature)
+5. [Routing — auto-gen từ `tool/gen_router.dart`](#5-routing--auto-gen)
+6. [Navigation pattern](#6-navigation-pattern)
+7. [Imports — luôn qua `import.dart`](#7-imports)
+8. [Form Fields — ưu tiên `Field*` widgets](#8-form-fields)
+9. [Scaffolds — `System*Scaffold` + unfocus form](#9-scaffolds--unfocus)
+10. [AppBar — ưu tiên `BaseAppBar`](#10-appbar)
+11. [List item conventions — `ItemBase`, spacing, radius](#11-list-item-conventions)
+12. [Design language — Modern · Minimal · Premium](#12-design-language)
+13. [Widget tái sử dụng — khi nào tách ra `lib/widget/`](#13-widget-tái-sử-dụng)
+14. [Checklist PR](#14-checklist-pr)
 
 ---
 
@@ -82,7 +84,118 @@ Refresh: `context.read<...>().add(RefreshBaseList(clearItems: false, completer: 
 
 ---
 
-## 2. Cấu trúc thư mục Feature
+## 2. Gọi API trực tiếp trong Bloc
+
+### Quy tắc
+
+Khi feature phải gọi API **không hợp với** `AppListBloc<T>` / `AppFormBloc<T>` /
+`SystemDetailBloc` (action endpoint, một GET/PATCH lẻ ngoài luồng list/form CRUD)
+→ **gọi API thẳng trong Bloc/Cubit**, **KHÔNG** tạo lớp `DataSource` trung gian
+cho 1–2 call đơn lẻ.
+
+Tham khảo mẫu chuẩn: `lib/pages/account/profile/bloc.dart` và
+`lib/pages/user/voucher_claim/bloc.dart`.
+
+### Cách làm
+
+- Inject `ApiClient` qua constructor: `required ApiClient apiClient`.
+- Trong handler:
+  `await _apiClient.dio(ApiService.X).get/post/patch(path, data: ...)`.
+- Bắt `DioException` tại chỗ → map sang state error
+  (`SystemFormStateStatus.fail` / cờ trong state Cubit).
+  `DioException` đã re-export transitively qua `import.dart` → `core_rest` —
+  **KHÔNG** thêm `import 'package:dio/dio.dart'`.
+- Endpoint nằm trên **domain khác** với subdomain của `ApiService.X`
+  → khai báo **absolute URL** trong `lib/api/app_api.dart`
+  (vd: `AppApi.voucher.campaignByCode`). Dio bypass `baseUrl` khi gặp scheme
+  `https://`, nhưng vẫn áp dụng full interceptors (auth/logger/error).
+- Cập nhật session sau call (vd: PATCH `/auth/me`):
+  `AuthSetup.instance.authSessionBloc.add(SessionUserUpdated(...))`.
+
+### Ví dụ — Cubit gọi API trực tiếp
+
+```dart
+class VoucherClaimCubit extends Cubit<VoucherClaimState> {
+  VoucherClaimCubit({required ApiClient apiClient})
+    : _apiClient = apiClient,
+      super(const VoucherClaimState());
+
+  final ApiClient _apiClient;
+
+  Future<({bool success, String? message})> _claim(String code) async {
+    try {
+      final res = await _apiClient
+          .dio(ApiService.coupon)
+          .get(AppApi.voucher.campaignByCode(code));
+      final ok = (res.statusCode ?? 0) >= 200 && (res.statusCode ?? 0) < 300;
+      return (success: ok, message: null);
+    } on DioException catch (e) {
+      return (success: false, message: e.message);
+    }
+  }
+}
+```
+
+### Khi nào mới tách `DataSource`?
+
+Chỉ tách khi feature có **nhiều endpoint** đáng group lại, hoặc cần **tái dùng**
+giữa nhiều Bloc. Một call lẻ → gộp luôn trong bloc cho gọn.
+
+---
+
+## 3. App tự config API/AuthSetup
+
+### Quy tắc
+
+`ApiService` enum + `api.suyxet.com` defaults trong AppCore là **convention /
+fallback sample** cho các dự án downstream tham khảo — **KHÔNG phải runtime spec**.
+
+Mỗi app tự build setup riêng trong `bootstrap()` (`lib/app_config.dart`):
+
+```dart
+final apiClient = ApiClient(ApiService.urlsFrom(config.apiDomain));
+final authSetup = AuthSetup.create(
+  apiClient: apiClient,
+  authBaseUrl: 'https://${ApiService.auth.subdomain}.${config.apiDomain}',
+  config: const AuthConfig(
+    mePath: '/auth/me',
+    refreshPath: '/auth/refresh',
+    logoutPath: '/auth/logout',
+    logoutSendsRefreshTokenInBody: true,
+  ),
+  bootstrapMinDuration: const Duration(milliseconds: 300),
+  onRequireLogin: (_) => appNavigator.pushNamed(RouterConstants.login),
+);
+```
+
+- `config.apiDomain` lấy từ `AppFlavorConfig` (dev hardcode, prod yêu cầu
+  `--dart-define=API_DOMAIN=...`).
+- `ApiService.coupon` / `ApiService.merchant` / ... chỉ là **subdomain prefix** —
+  bind vào bất kỳ domain nào app set.
+- Endpoint **không thuộc** domain chính: định nghĩa **absolute URL** trong
+  `lib/api/app_api.dart` (vd: `AppApi.voucher.*` cho domain
+  `voucher.api-qr.iotcommunication.net`).
+
+### Khi làm feature mới — bắt buộc
+
+1. **Đọc trước** `lib/app_config.dart` + `lib/api/app_api.dart` của project
+   để biết domain/path thật.
+2. **KHÔNG** suy diễn từ `ApiService` enum của AppCore hay giả định
+   `suyxet.com` — đó chỉ là sample.
+3. Endpoint chưa có trong `AppApi`: thêm vào `AppApi.X`
+   - Cùng domain với `ApiService.X` đã config → relative path.
+   - Khác domain → absolute URL (Dio tự bypass baseUrl).
+4. Trong code chỉ tham chiếu `ApiService.X` (subdomain) và `AppApi.X.path` —
+   **KHÔNG hardcode full URL** trong feature.
+
+### Vì sao
+
+Sample/fallback API của AppCore (`suyxet.com`) không phải runtime spec — mỗi app
+có domain/endpoint riêng. Lẫn 2 thứ này dẫn đến hardcode sai domain.
+
+---
+
+## 4. Cấu trúc thư mục Feature
 
 ```
 lib/pages/<group>/<feature>/
@@ -116,7 +229,7 @@ lib/pages/<group>/<feature>/
 
 ---
 
-## 3. Routing — auto-gen
+## 5. Routing — auto-gen
 
 **KHÔNG sửa tay** `lib/routes.dart` và `lib/router_constants.dart`.
 
@@ -143,7 +256,7 @@ lib/pages/merchant/coupon/form/page.dart
 
 ---
 
-## 4. Navigation pattern
+## 6. Navigation pattern
 
 ```dart
 // Push - List → Detail (truyền id)
@@ -169,7 +282,7 @@ appNavigator.pop();
 
 ---
 
-## 5. Imports
+## 7. Imports
 
 **Mọi file trong `lib/pages/` chỉ import qua barrel `lib/import.dart`:**
 
@@ -198,7 +311,7 @@ import '../../../../import.dart';
 
 ---
 
-## 6. Form Fields
+## 8. Form Fields
 
 ### Quy tắc
 
@@ -233,7 +346,7 @@ mặc định khi viết feature mới.
 
 ---
 
-## 7. Scaffolds + unfocus
+## 9. Scaffolds + unfocus
 
 ### Quy tắc
 
@@ -270,7 +383,7 @@ GestureDetector(
 
 ---
 
-## 8. AppBar
+## 10. AppBar
 
 ### Quy tắc
 
@@ -308,7 +421,7 @@ có `AppBarThemeExtension`) — ghi rõ lý do trong comment.
 
 ---
 
-## 9. List item conventions
+## 11. List item conventions
 
 ### Quy tắc
 
@@ -360,7 +473,7 @@ ListView.separated(
 
 ---
 
-## 10. Design language
+## 12. Design language
 
 > Nguyên tắc UI/UX cho toàn app — đặc biệt nghiêm ngặt với các màn Auth
 > (login, register, forgot_password, otp, reset_password, welcome).
@@ -398,7 +511,7 @@ Reference: Linear / Notion / Stripe / Airbnb / Revolut / Apple / Google Material
 - Buttons: **16–20**
 - Inputs: **16**
 - Cards: **20**
-- List items: **12** (xem mục 9)
+- List items: **12** (xem mục 11)
 
 ### Buttons
 
@@ -457,7 +570,7 @@ component giữa các màn. Giữ ngôn ngữ thiết kế thống nhất xuyên
 
 ---
 
-## 11. Widget tái sử dụng
+## 13. Widget tái sử dụng
 
 | Phạm vi dùng | Đặt ở đâu |
 |--------------|-----------|
@@ -469,11 +582,13 @@ File đặt tên **snake_case** theo tên class chính (vd: `gradient_button.dar
 
 ---
 
-## 12. Checklist PR
+## 14. Checklist PR
 
 Trước khi mở PR, đối chiếu nhanh:
 
 - [ ] State: list/detail/form dùng `System*Bloc` / `App*Bloc`, **không** Cubit (trừ khi state UI-local đơn giản)
+- [ ] Ad-hoc API (ngoài System*Bloc): inject `ApiClient`, gọi `_apiClient.dio(ApiService.X)` thẳng trong Bloc + catch `DioException`; **không** tạo `DataSource` cho call lẻ
+- [ ] Domain/endpoint đọc từ `lib/app_config.dart` + `lib/api/app_api.dart` của project; **không** suy diễn từ AppCore `ApiService`/`suyxet.com`; URL khác domain → khai báo absolute trong `AppApi`
 - [ ] Cấu trúc thư mục đúng: `bloc.dart`, `page.dart`, `widgets/`, `detail/`, `form/`
 - [ ] Page nhận args dùng `const FooPage(this.args, {super.key})` + `final Map? args`
 - [ ] Đã chạy `dart run tool/gen_router.dart` nếu thêm/đổi/xoá `page.dart`

@@ -41,17 +41,29 @@ class NotificationModel implements JsonModel<NotificationModel> {
   String get idField => 'id';
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] is Map
+        ? Map<String, dynamic>.from(json['data'] as Map)
+        : null;
     return NotificationModel(
       id: (json['id'] ?? json['_id'])?.toString() ?? '',
       title: (json['title'] ?? '').toString(),
-      body: (json['body'] ?? json['description'] ?? json['content'] ?? '').toString(),
+      body: (json['body'] ?? json['description'] ?? json['content'] ?? '')
+          .toString(),
       type: json['type']?.toString(),
-      isRead: json['is_read'] == true || json['isRead'] == true,
+      isRead: json['read'] == true ||
+          json['is_read'] == true ||
+          json['isRead'] == true,
       createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']),
       screen: json['screen']?.toString(),
-      referenceId: (json['reference_id'] ?? json['referenceId'] ?? json['reportId'])?.toString(),
-      imageUrl: (json['image_url'] ?? json['imageUrl'] ?? json['image'])?.toString(),
-      params: json['params'] is Map ? Map<String, dynamic>.from(json['params'] as Map) : null,
+      referenceId: (json['reference_id'] ??
+              json['referenceId'] ??
+              json['reportId'] ??
+              data?['voucherCodeId'] ??
+              data?['campaignId'])
+          ?.toString(),
+      imageUrl: (json['image_url'] ?? json['imageUrl'] ?? json['image'])
+          ?.toString(),
+      params: data,
     );
   }
 
@@ -65,12 +77,12 @@ class NotificationModel implements JsonModel<NotificationModel> {
         'title': title,
         'body': body,
         if (type != null) 'type': type,
-        'is_read': isRead,
-        if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
+        'read': isRead,
+        if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
         if (screen != null) 'screen': screen,
         if (referenceId != null) 'reference_id': referenceId,
         if (imageUrl != null) 'image_url': imageUrl,
-        if (params != null) 'params': params,
+        if (params != null) 'data': params,
       };
 
   NotificationModel copyWith({bool? isRead}) {

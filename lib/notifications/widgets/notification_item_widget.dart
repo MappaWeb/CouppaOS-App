@@ -12,7 +12,6 @@ class NotificationItemWidget extends StatelessWidget {
     final isRead = notification.isRead;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
