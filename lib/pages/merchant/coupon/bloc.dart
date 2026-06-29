@@ -10,3 +10,4 @@ class MerchantCouponListBloc extends AppListBloc<VoucherModel> {
           query: ListQuery.fromMap(initialFilters ?? const {}),
         );
 }
+
