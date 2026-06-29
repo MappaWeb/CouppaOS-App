@@ -13,27 +13,27 @@ dependencies:
     git:
       url: https://github.com/MappaWeb/AppCore.git
       path: packages/shared_core
-      ref: 466709c5fb3121360f7d53464449263f4997f339
+      ref: 97c321add80d4de26b092a64406ef50d59b7294d
   core_monitoring:
     git:
       url: https://github.com/MappaWeb/AppCore.git
       path: packages/shared_monitoring
-      ref: 466709c5fb3121360f7d53464449263f4997f339
+      ref: 97c321add80d4de26b092a64406ef50d59b7294d
   core_data:
     git:
       url: https://github.com/MappaWeb/AppCore.git
       path: packages/core_data
-      ref: 466709c5fb3121360f7d53464449263f4997f339
+      ref: 97c321add80d4de26b092a64406ef50d59b7294d
   core_rest:
     git:
       url: https://github.com/MappaWeb/AppCore.git
       path: packages/core_rest
-      ref: 466709c5fb3121360f7d53464449263f4997f339
+      ref: 97c321add80d4de26b092a64406ef50d59b7294d
   core_auth:
     git:
       url: https://github.com/MappaWeb/AppCore.git
       path: packages/shared_auth
-      ref: 466709c5fb3121360f7d53464449263f4997f339
+      ref: 97c321add80d4de26b092a64406ef50d59b7294d
 
   cupertino_icons: ^1.0.8
   firebase_core: ^4.11.0

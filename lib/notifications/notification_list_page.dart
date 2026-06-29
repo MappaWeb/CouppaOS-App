@@ -63,8 +63,9 @@ class _NotificationListContent extends StatelessWidget {
     NotificationListBloc bloc,
     NotificationModel notification,
   ) {
-    if (!notification.isRead) {
-      bloc.add(MarkNotificationRead(notification.id));
+    final wasUnread = !notification.isRead;
+    bloc.add(MarkNotificationRead(notification.id));
+    if (wasUnread) {
       context.read<NotificationCountCubit>().decrement();
     }
 

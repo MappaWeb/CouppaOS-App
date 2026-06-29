@@ -37,6 +37,11 @@ class _MyAppState extends State<MyApp> {
             icon: Icons.confirmation_number_outlined,
           ),
           NavItem(
+            label: 'Nhận voucher',
+            path: '/User/VoucherClaim',
+            icon: Icons.redeem_outlined,
+          ),
+          NavItem(
             label: 'Tài khoản',
             path: '/Account',
             icon: Icons.person_outline,

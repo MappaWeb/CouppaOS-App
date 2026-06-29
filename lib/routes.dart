@@ -1,8 +1,10 @@
 import 'package:core/core.dart' show RouteBase, GoRoute;
 
 import 'pages/account/page.dart';
+import 'pages/account/profile/page.dart';
 import 'pages/become_merchant/location/page.dart';
 import 'pages/become_merchant/page.dart';
+import 'pages/change_password/page.dart';
 import 'pages/forgot_password/page.dart';
 import 'pages/loading/page.dart';
 import 'pages/login/page.dart';
@@ -18,6 +20,7 @@ import 'pages/register/page.dart';
 import 'pages/start/page.dart';
 import 'pages/user/coupon/detail/page.dart';
 import 'pages/user/coupon/page.dart';
+import 'pages/user/voucher_claim/page.dart';
 
 List<RouteBase> get routes => <RouteBase>[
   GoRoute(
@@ -30,6 +33,10 @@ List<RouteBase> get routes => <RouteBase>[
     builder: (context, state) => const AccountPage(),
   ),
   GoRoute(
+    path: '/Account/Profile',
+    builder: (context, state) => const AccountProfilePage(),
+  ),
+  GoRoute(
     path: '/BecomeMerchant/Location',
     builder: (context, state) => BecomeMerchantLocationPage(state.uri.queryParameters.isNotEmpty
     ? state.uri.queryParameters : state.extra as Map?),
@@ -37,6 +44,10 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/BecomeMerchant',
     builder: (context, state) => const BecomeMerchantPage(),
+  ),
+  GoRoute(
+    path: '/ChangePassword',
+    builder: (context, state) => const ChangePasswordPage(),
   ),
   GoRoute(
     path: '/ForgotPassword',
@@ -104,5 +115,9 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/User/Coupon',
     builder: (context, state) => const UserCouponPage(),
+  ),
+  GoRoute(
+    path: '/User/VoucherClaim',
+    builder: (context, state) => const UserVoucherClaimPage(),
   ),
 ];

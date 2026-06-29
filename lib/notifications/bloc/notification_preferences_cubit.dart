@@ -33,9 +33,8 @@ class NotificationPreferencesState {
 
 class NotificationPreferencesCubit
     extends Cubit<NotificationPreferencesState> {
-  NotificationPreferencesCubit({required NotificationDataSource dataSource})
-      : _dataSource = dataSource,
-        super(const NotificationPreferencesState());
+  NotificationPreferencesCubit({required this._dataSource})
+      : super(const NotificationPreferencesState());
 
   final NotificationDataSource _dataSource;
 
@@ -50,11 +49,11 @@ class NotificationPreferencesCubit
     emit(state.copyWith(preferences: prefs, isLoading: false, hasError: false));
   }
 
-  Future<void> setRedeemAlerts(bool value) =>
-      _save(state.preferences.copyWith(redeemAlerts: value));
+  Future<void> setPromoAlerts(bool value) =>
+      _save(state.preferences.copyWith(promoAlerts: value));
 
-  Future<void> setLinkRequests(bool value) =>
-      _save(state.preferences.copyWith(linkRequests: value));
+  Future<void> setVoucherExpiryAlerts(bool value) =>
+      _save(state.preferences.copyWith(voucherExpiryAlerts: value));
 
   Future<void> _save(NotificationPreferences next) async {
     final previous = state.preferences;

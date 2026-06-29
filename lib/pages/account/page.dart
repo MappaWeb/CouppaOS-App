@@ -1,6 +1,7 @@
 import '../../import.dart';
 import '../../notifications/bloc/notification_count_cubit.dart';
 import '../../notifications/notification_list_page.dart';
+import '../../notifications/notification_preferences_page.dart';
 
 class AccountPage extends StatelessWidget {
   const AccountPage({super.key});
@@ -54,9 +55,20 @@ class AccountPage extends StatelessWidget {
               _NavTile(
                 icon: Icons.person_outline_rounded,
                 title: 'Thông tin cá nhân',
-                onTap: () {
-                  // TODO: navigate to edit information
-                },
+                onTap: () =>
+                    appNavigator.pushNamed(RouterConstants.accountProfile),
+              ),
+              _NavTile(
+                icon: Icons.notifications_outlined,
+                title: 'Cài đặt thông báo',
+                onTap: () =>
+                    appNavigator.push(const NotificationPreferencesPage()),
+              ),
+              _NavTile(
+                icon: Icons.lock_outline_rounded,
+                title: 'Đổi mật khẩu',
+                onTap: () =>
+                    appNavigator.pushNamed(RouterConstants.changePassword),
               ),
             ],
           ),
@@ -183,12 +195,14 @@ class _ProfileHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  currentUser?.displayName ?? 'Khách',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Palette.textPrimary,
+                BlocBuilder<AuthSessionBloc, AuthSessionState>(
+                  builder: (context, _) => Text(
+                    currentUser?.effectiveDisplayName ?? 'Khách',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Palette.textPrimary,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),

@@ -4,6 +4,7 @@ import 'pages/merchant/coupon/page.dart';
 import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
 import 'pages/user/coupon/page.dart';
+import 'pages/user/voucher_claim/page.dart';
 import 'widget/my_app.dart';
 
 // Branch indices:
@@ -12,8 +13,9 @@ import 'widget/my_app.dart';
 //  2: /Merchant/Redeem      (merchant)
 //  3: /Merchant/Report      (merchant)
 //  4: /Account              (both roles)
+//  5: /User/VoucherClaim    (user)
 const _roleBranches = <UserRole, List<int>>{
-  UserRole.user: [0, 4],
+  UserRole.user: [0, 5, 4],
   UserRole.merchant: [1, 2, 3, 4],
 };
 
@@ -122,6 +124,19 @@ final shellRouter = [
               key: state.pageKey,
               name: state.uri.path,
               child: const AccountPage(),
+            ),
+            redirect: _requireAuth,
+          ),
+        ],
+      ),
+      StatefulShellBranch(
+        routes: [
+          GoRoute(
+            path: '/User/VoucherClaim',
+            pageBuilder: (context, state) => _fadePage(
+              key: state.pageKey,
+              name: state.uri.path,
+              child: const UserVoucherClaimPage(),
             ),
             redirect: _requireAuth,
           ),
