@@ -19,6 +19,10 @@ abstract final class AppApi {
   /// không có trong `ApiService` enum).
   /// Base: `https://voucher.api-qr.iotcommunication.net`.
   static final voucher = _VoucherPaths();
+
+  /// Merchant Partner / Link APIs — absolute URLs (domain riêng).
+  /// Base: `https://merchant.api-qr.iotcommunication.net`.
+  static final partner = _PartnerPaths();
 }
 
 // ═════════════════════════════════════════════════════════════════════
@@ -243,4 +247,27 @@ final class _VoucherPaths {
 
   /// GET /qr/verify — Verify QR (công khai)
   final qrVerify = _abs('/qr/verify');
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// Merchant Partner / Link — https://merchant.api-qr.iotcommunication.net
+// ═════════════════════════════════════════════════════════════════════
+
+final class _PartnerPaths {
+  _PartnerPaths();
+
+  static const _base = 'https://merchant.api-qr.iotcommunication.net';
+
+  static String _abs(String path) => '$_base$path';
+
+  /// GET /merchants/me/partners — Đối tác đã liên kết + cơ sở của họ
+  final partners = _abs('/merchants/me/partners');
+
+  /// GET  /merchants/me/links — Danh sách yêu cầu liên kết (incoming + outgoing)
+  /// POST /merchants/me/links — Gửi yêu cầu liên kết (body: `{"partnerPhone": "..."}`)
+  final links = _abs('/merchants/me/links');
+
+  /// POST /merchants/me/links/{id}/respond — Đồng ý / từ chối yêu cầu
+  /// (body: `{"accept": true|false}`)
+  String linkRespond(String id) => _abs('/merchants/me/links/$id/respond');
 }

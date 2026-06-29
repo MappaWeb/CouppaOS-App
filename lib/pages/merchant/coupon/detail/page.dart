@@ -40,6 +40,9 @@ class _Content extends StatelessWidget {
           // actions: [_DetailMenu(id: id)],
           bottom: const TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
+            labelColor: Palette.primary,
+            unselectedLabelColor: Palette.textPrimary3,
+            indicatorColor: Palette.primary,
             tabs: [
               Tab(text: 'Thông tin'),
               Tab(text: 'Danh sách mã'),
