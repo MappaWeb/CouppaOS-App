@@ -20,6 +20,8 @@ import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
 import 'pages/merchant/staff/form/page.dart';
 import 'pages/merchant/staff/list/page.dart';
+import 'pages/merchant/store/form/page.dart';
+import 'pages/merchant/store/list/page.dart';
 import 'pages/otp/page.dart';
 import 'pages/register/page.dart';
 import 'pages/start/page.dart';
@@ -93,6 +95,12 @@ class RouterConstants {
 
   ///Router to [MerchantStaffListPage]
   static String get merchantStaffList => '/Merchant/Staff/List';
+
+  ///Router to [MerchantStoreFormPage]
+  static String get merchantStoreForm => '/Merchant/Store/Form';
+
+  ///Router to [MerchantStoreListPage]
+  static String get merchantStoreList => '/Merchant/Store/List';
 
   ///Router to [OtpPage]
   static String get otp => '/Otp';

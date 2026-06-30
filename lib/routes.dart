@@ -21,6 +21,8 @@ import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
 import 'pages/merchant/staff/form/page.dart';
 import 'pages/merchant/staff/list/page.dart';
+import 'pages/merchant/store/form/page.dart';
+import 'pages/merchant/store/list/page.dart';
 import 'pages/otp/page.dart';
 import 'pages/register/page.dart';
 import 'pages/start/page.dart';
@@ -125,6 +127,15 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/Merchant/Staff/List',
     builder: (context, state) => const MerchantStaffListPage(),
+  ),
+  GoRoute(
+    path: '/Merchant/Store/Form',
+    builder: (context, state) => MerchantStoreFormPage(state.uri.queryParameters.isNotEmpty
+    ? state.uri.queryParameters : state.extra as Map?),
+  ),
+  GoRoute(
+    path: '/Merchant/Store/List',
+    builder: (context, state) => const MerchantStoreListPage(),
   ),
   GoRoute(
     path: '/Otp',

@@ -55,7 +55,11 @@ class AccountPage extends StatelessWidget {
                   title: 'Hồ sơ cửa hàng',
                   onTap: () => appNavigator.pushNamed(RouterConstants.merchantProfile),
                 ),
-                _NavTile(icon: ViIcons.location_pin, title: 'Danh sách chi nhánh', onTap: () {}),
+                _NavTile(
+                  icon: ViIcons.location_pin,
+                  title: 'Danh sách chi nhánh',
+                  onTap: () => appNavigator.pushNamed(RouterConstants.merchantStoreList),
+                ),
                 _NavTile(
                   icon: ViIcons.users_two,
                   title: 'Nhân viên cửa hàng',
