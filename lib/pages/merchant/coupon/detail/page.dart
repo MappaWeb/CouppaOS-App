@@ -17,10 +17,8 @@ class MerchantCouponDetailPage extends StatelessWidget {
         BlocProvider(create: (_) => MerchantCouponDetailBloc(id)),
         BlocProvider(create: (_) => MerchantCouponDetailCodesBloc(id)),
         BlocProvider(
-          create: (ctx) => MerchantCouponGenerateCubit(
-            apiClient: ctx.read<ApiClient>(),
-            campaignId: id,
-          ),
+          create: (ctx) =>
+              MerchantCouponGenerateCubit(apiClient: ctx.read<ApiClient>(), campaignId: id),
         ),
       ],
       child: _Content(id: id),
@@ -48,6 +46,9 @@ class _Content extends StatelessWidget {
               // actions: [_DetailMenu(id: id)],
               bottom: const TabBar(
                 indicatorSize: TabBarIndicatorSize.tab,
+                labelColor: Palette.primary,
+                unselectedLabelColor: Palette.textPrimary3,
+                indicatorColor: Palette.primary,
                 tabs: [
                   Tab(text: 'Thông tin'),
                   Tab(text: 'Danh sách mã'),
@@ -448,9 +449,7 @@ class _CodesTabState extends State<_CodesTab> {
         detailBuilder: (context, item, isSelected) => _CodeItem(item: item),
         topSlivers: [
           if (isCampaignMode)
-            SliverToBoxAdapter(
-              child: _GeneratePanel(totalQuantity: totalQuantity),
-            ),
+            SliverToBoxAdapter(child: _GeneratePanel(totalQuantity: totalQuantity)),
         ],
         bottomSlivers: [
           SliverToBoxAdapter(child: SizedBox(height: MediaQuery.paddingOf(context).bottom)),
@@ -533,77 +532,75 @@ class _GeneratePanelState extends State<_GeneratePanel> {
                   ),
                 ],
               ),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _ctrl,
-                  keyboardType: TextInputType.number,
-                  onChanged: (v) => _onChanged(v, remaining),
-                  decoration: InputDecoration(
-                    hintText: 'Số lượng mã cần sinh',
-                    hintStyle: const TextStyle(fontSize: 13, color: Palette.textPrimary3),
-                    errorText: _validationError,
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Palette.borderColor),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Palette.borderColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Palette.primary, width: 1.5),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Palette.redTxtColor),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Palette.redTxtColor, width: 1.5),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _ctrl,
+                      keyboardType: TextInputType.number,
+                      onChanged: (v) => _onChanged(v, remaining),
+                      decoration: InputDecoration(
+                        hintText: 'Số lượng mã cần sinh',
+                        hintStyle: const TextStyle(fontSize: 13, color: Palette.textPrimary3),
+                        errorText: _validationError,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Palette.borderColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Palette.borderColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Palette.primary, width: 1.5),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Palette.redTxtColor),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Palette.redTxtColor, width: 1.5),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              BlocBuilder<MerchantCouponGenerateCubit, MerchantCouponGenerateState>(
-                builder: (context, genState) {
-                  final canSubmit = !genState.loading && _validationError == null;
-                  return SizedBox(
-                    height: 40,
-                    child: ElevatedButton(
-                      onPressed: canSubmit ? () => _submit(context) : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Palette.primary,
-                        disabledBackgroundColor: Palette.borderColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                  const SizedBox(width: 8),
+                  BlocBuilder<MerchantCouponGenerateCubit, MerchantCouponGenerateState>(
+                    builder: (context, genState) {
+                      final canSubmit = !genState.loading && _validationError == null;
+                      return SizedBox(
+                        height: 40,
+                        child: ElevatedButton(
+                          onPressed: canSubmit ? () => _submit(context) : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Palette.primary,
+                            disabledBackgroundColor: Palette.borderColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: genState.loading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('Sinh mã', style: TextStyle(fontSize: 13)),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      child: genState.loading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Sinh mã', style: TextStyle(fontSize: 13)),
-                    ),
-                  );
-                },
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
             ],
           ),
         );

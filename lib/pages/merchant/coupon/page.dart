@@ -103,6 +103,9 @@ class _MerchantCouponView extends StatelessWidget {
           },
         ),
       ),
+      bottomSlivers: [
+        SliverToBoxAdapter(child: SizedBox(height: MediaQuery.paddingOf(context).bottom)),
+      ],
       floatingActionButton: SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
