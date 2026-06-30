@@ -22,12 +22,7 @@ class AccountPage extends StatelessWidget {
       appBar: BaseAppBar(
         context: context,
         title: Text(isMerchant ? 'Tài khoản Merchant' : 'Tài khoản'),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 8),
-            child: _NotificationBell(),
-          ),
-        ],
+        actions: const [Padding(padding: EdgeInsets.only(right: 8), child: _NotificationBell())],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
@@ -46,8 +41,25 @@ class AccountPage extends StatelessWidget {
                 _NavTile(
                   icon: Icons.qr_code_scanner_rounded,
                   title: 'Đổi mã tại quầy',
-                  onTap: () =>
-                      appNavigator.pushNamed(RouterConstants.merchantRedeem),
+                  onTap: () => appNavigator.pushNamed(RouterConstants.merchantRedeem),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _SectionLabel('Quản lý cửa hàng'),
+            const SizedBox(height: 8),
+            _SettingsGroup(
+              children: [
+                _NavTile(
+                  icon: Icons.storefront,
+                  title: 'Hồ sơ cửa hàng',
+                  onTap: () => appNavigator.pushNamed(RouterConstants.merchantProfile),
+                ),
+                _NavTile(icon: ViIcons.location_pin, title: 'Danh sách chi nhánh', onTap: () {}),
+                _NavTile(
+                  icon: ViIcons.users_two,
+                  title: 'Nhân viên cửa hàng',
+                  onTap: () => appNavigator.pushNamed(RouterConstants.merchantStaffList),
                 ),
               ],
             ),
@@ -70,20 +82,17 @@ class AccountPage extends StatelessWidget {
               _NavTile(
                 icon: Icons.person_outline_rounded,
                 title: 'Thông tin cá nhân',
-                onTap: () =>
-                    appNavigator.pushNamed(RouterConstants.accountProfile),
+                onTap: () => appNavigator.pushNamed(RouterConstants.accountProfile),
               ),
               _NavTile(
                 icon: Icons.notifications_outlined,
                 title: 'Cài đặt thông báo',
-                onTap: () =>
-                    appNavigator.push(const NotificationPreferencesPage()),
+                onTap: () => appNavigator.push(const NotificationPreferencesPage()),
               ),
               _NavTile(
                 icon: Icons.lock_outline_rounded,
                 title: 'Đổi mật khẩu',
-                onTap: () =>
-                    appNavigator.pushNamed(RouterConstants.changePassword),
+                onTap: () => appNavigator.pushNamed(RouterConstants.changePassword),
               ),
             ],
           ),
@@ -104,6 +113,7 @@ class AccountPage extends StatelessWidget {
               ),
             ],
           ),
+          SizedBox(height: MediaQuery.paddingOf(context).bottom,)
         ],
       ),
     );
@@ -127,32 +137,19 @@ class _NotificationBell extends StatelessWidget {
               clipBehavior: Clip.none,
               alignment: Alignment.center,
               children: [
-                const Icon(
-                  Icons.notifications_none_rounded,
-                  color: Palette.textPrimary,
-                  size: 24,
-                ),
+                const Icon(Icons.notifications_none_rounded, color: Palette.textPrimary, size: 24),
                 if (unread > 0)
                   Positioned(
                     right: 8,
                     top: 8,
                     child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: unread > 9 ? 4 : 5,
-                        vertical: 1,
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: unread > 9 ? 4 : 5, vertical: 1),
                       decoration: BoxDecoration(
                         color: Palette.primary,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Palette.cardColor,
-                          width: 1.5,
-                        ),
+                        border: Border.all(color: Palette.cardColor, width: 1.5),
                       ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
+                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                       child: Center(
                         child: Text(
                           unread > 99 ? '99+' : '$unread',
@@ -222,10 +219,7 @@ class _ProfileHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Palette.bgColor,
                     borderRadius: BorderRadius.circular(999),
@@ -268,10 +262,7 @@ class _BecomeMerchantCard extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.storefront_outlined,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.storefront_outlined, color: Colors.white),
               ),
               const SizedBox(width: 12),
               const Expanded(
@@ -289,10 +280,7 @@ class _BecomeMerchantCard extends StatelessWidget {
                     SizedBox(height: 2),
                     Text(
                       'Tạo coupon, quản lý ưu đãi của bạn',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                   ],
                 ),
@@ -339,10 +327,12 @@ class _SettingsGroup extends StatelessWidget {
     for (var i = 0; i < children.length; i++) {
       rows.add(children[i]);
       if (i < children.length - 1) {
-        rows.add(const Padding(
-          padding: EdgeInsets.only(left: 56),
-          child: Divider(height: 1, color: Palette.dividerColor),
-        ));
+        rows.add(
+          const Padding(
+            padding: EdgeInsets.only(left: 56),
+            child: Divider(height: 1, color: Palette.dividerColor),
+          ),
+        );
       }
     }
     return Container(
@@ -384,9 +374,7 @@ class _NavTile extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: danger
-                    ? Palette.redTxtColor.withValues(alpha: 0.08)
-                    : Palette.bgColor,
+                color: danger ? Palette.redTxtColor.withValues(alpha: 0.08) : Palette.bgColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, size: 18, color: color),
@@ -395,18 +383,10 @@ class _NavTile extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: color,
-                ),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: color),
               ),
             ),
-            if (!danger)
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Palette.textPrimary3,
-              ),
+            if (!danger) const Icon(Icons.chevron_right_rounded, color: Palette.textPrimary3),
           ],
         ),
       ),
@@ -442,11 +422,7 @@ class _SwitchTile extends StatelessWidget {
               color: Palette.bgColor,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.swap_horiz_rounded,
-              size: 18,
-              color: Palette.textPrimary,
-            ),
+            child: const Icon(Icons.swap_horiz_rounded, size: 18, color: Palette.textPrimary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -462,21 +438,11 @@ class _SwitchTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Palette.textPrimary3,
-                  ),
-                ),
+                Text(subtitle, style: const TextStyle(fontSize: 12, color: Palette.textPrimary3)),
               ],
             ),
           ),
-          Switch.adaptive(
-            value: value,
-            onChanged: onChanged,
-            activeThumbColor: Palette.primary,
-          ),
+          Switch.adaptive(value: value, onChanged: onChanged, activeThumbColor: Palette.primary),
         ],
       ),
     );
