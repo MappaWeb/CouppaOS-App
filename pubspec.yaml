@@ -34,6 +34,11 @@ dependencies:
       url: https://github.com/MappaWeb/AppCore.git
       path: packages/shared_auth
       ref: 97c321add80d4de26b092a64406ef50d59b7294d
+  core_charts:
+    git:
+      url: https://github.com/MappaWeb/AppCore.git
+      path: packages/shared_charts
+      ref: 97c321add80d4de26b092a64406ef50d59b7294d
 
   cupertino_icons: ^1.0.8
   firebase_core: ^4.11.0

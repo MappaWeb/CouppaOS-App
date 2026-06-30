@@ -23,6 +23,10 @@ abstract final class AppApi {
   /// Merchant Partner / Link APIs — absolute URLs (domain riêng).
   /// Base: `https://merchant.api-qr.iotcommunication.net`.
   static final partner = _PartnerPaths();
+
+  /// Campaign statistics — absolute URLs (domain riêng).
+  /// Base: `https://stats.api-qr.iotcommunication.net`.
+  static final stats = _StatsPaths();
 }
 
 // ═════════════════════════════════════════════════════════════════════
@@ -270,4 +274,19 @@ final class _PartnerPaths {
   /// POST /merchants/me/links/{id}/respond — Đồng ý / từ chối yêu cầu
   /// (body: `{"accept": true|false}`)
   String linkRespond(String id) => _abs('/merchants/me/links/$id/respond');
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// Stats — https://stats.api-qr.iotcommunication.net
+// ═════════════════════════════════════════════════════════════════════
+
+final class _StatsPaths {
+  _StatsPaths();
+
+  static const _base = 'https://stats.api-qr.iotcommunication.net';
+
+  static String _abs(String path) => '$_base$path';
+
+  /// GET /stats/campaigns — Thống kê tất cả campaign của merchant
+  final campaigns = _abs('/stats/campaigns');
 }
