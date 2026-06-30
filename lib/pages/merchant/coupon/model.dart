@@ -36,7 +36,7 @@ class VoucherModel implements JsonModel<VoucherModel> {
   final String slug;
   final String code;
   final String name;
-  final num? faceValue;
+  final String? faceValue;
   final String? claimLayout;
   final String? note;
   final String? issueMode;
@@ -84,7 +84,7 @@ class VoucherModel implements JsonModel<VoucherModel> {
       slug: (json['slug'] ?? '').toString(),
       code: (json['code'] ?? '').toString(),
       name: (json['name'] ?? '').toString(),
-      faceValue: json['faceValue'] is num ? json['faceValue'] as num : null,
+      faceValue: json['faceValue']?.toString(),
       claimLayout: json['claimLayout']?.toString(),
       note: json['note']?.toString(),
       issueMode: json['issueMode']?.toString(),

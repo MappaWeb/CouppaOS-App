@@ -17,17 +17,13 @@ class MerchantCouponListItem extends StatelessWidget {
     final progress = hasQuota ? (issued / total).clamp(0.0, 1.0) : 0.0;
     final name = item.name.isEmpty ? '(không tên)' : item.name;
     final canEdit = item.status.toUpperCase() != 'ACTIVE';
+    final isDirect = (item.issueMode ?? '').toUpperCase() == 'DIRECT';
 
     return ItemBase(
       onPressed: onTap,
       showMultiActions: true,
       actions: [
-        ItemMenuAction(
-          key: 'edit',
-          label: 'Sửa',
-          iconData: Icons.edit_outlined,
-          enabled: canEdit,
-        ),
+        ItemMenuAction(key: 'edit', label: 'Sửa', iconData: Icons.edit_outlined, enabled: canEdit),
       ],
       onAction: (ctx, key) {
         if (key == 'edit') onEdit?.call();
@@ -43,11 +39,7 @@ class MerchantCouponListItem extends StatelessWidget {
           color: Palette.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(
-          Icons.local_offer_outlined,
-          color: Palette.primary,
-          size: 22,
-        ),
+        child: const Icon(Icons.local_offer_outlined, color: Palette.primary, size: 22),
       ),
       title: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,10 +53,7 @@ class MerchantCouponListItem extends StatelessWidget {
               softWrap: true,
             ),
           ),
-          if (item.status.isNotEmpty) ...[
-            const SizedBox(width: 8),
-            CouponStatusBadge(item.status),
-          ],
+          if (item.status.isNotEmpty) ...[const SizedBox(width: 8), CouponStatusBadge(item.status)],
         ],
       ),
       content: Column(
@@ -76,10 +65,7 @@ class MerchantCouponListItem extends StatelessWidget {
               children: [
                 if (item.code.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: Palette.bgColor,
                       borderRadius: BorderRadius.circular(6),
@@ -94,16 +80,19 @@ class MerchantCouponListItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (item.faceValue != null && item.faceValue! > 0) ...[
-                  if (item.code.isNotEmpty) const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      formatCurrency(item.faceValue!.toDouble()),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                if (isDirect) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Palette.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'Lô',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                         color: Palette.primary,
                       ),
                     ),
@@ -141,18 +130,11 @@ class MerchantCouponListItem extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(
-                  Icons.event_outlined,
-                  size: 14,
-                  color: Palette.textPrimary3,
-                ),
+                const Icon(Icons.event_outlined, size: 14, color: Palette.textPrimary3),
                 const SizedBox(width: 4),
                 Text(
                   'HSD ${date(item.validTo!.toIso8601String())}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Palette.textPrimary3,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Palette.textPrimary3),
                 ),
               ],
             ),

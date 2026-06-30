@@ -90,6 +90,7 @@ class _MerchantCouponView extends StatelessWidget {
         builder: (ctx) => MerchantCouponListItem(
           item,
           onTap: () {
+            return;
             appNavigator.pushNamed(
               RouterConstants.merchantCouponDetail,
               arguments: {'id': item.id},
