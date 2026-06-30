@@ -16,7 +16,7 @@ class LoadingPage extends StatelessWidget {
             const Icon(Icons.local_offer, size: 96, color: Palette.primary),
             const SizedBox(height: 16),
             const Text(
-              'Couppa Mini',
+              'CouppaOS',
               style: TextStyle(fontWeight: .w700, fontSize: 40, color: Palette.primary),
             ),
 

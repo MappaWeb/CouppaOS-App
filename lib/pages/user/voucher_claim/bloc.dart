@@ -14,11 +14,15 @@ class VoucherClaimDialog {
     required this.code,
     required this.success,
     this.message,
+    this.campaignName,
+    this.merchantName,
   });
 
   final String code;
   final bool success;
   final String? message;
+  final String? campaignName;
+  final String? merchantName;
 }
 
 class VoucherClaimState {
@@ -110,18 +114,71 @@ class VoucherClaimCubit extends Cubit<VoucherClaimState> {
     return out;
   }
 
-  /// GET `/campaigns/by-code/{code}` — 2xx = nhận thành công.
-  Future<({bool success, String? message})> _claim(String code) async {
+  /// 1) GET `/campaigns/by-code/{code}` để lấy `campaignId` + thông tin hiển thị.
+  /// 2) POST `/vouchers/claims` với body `{"campaignId": ...}` để nhận voucher.
+  /// Cả hai đều 2xx mới coi là thành công; khi đó tick `voucherWalletDirty`
+  /// để tab "Coupon của tôi" tự refresh.
+  Future<
+    ({bool success, String? message, String? campaignName, String? merchantName})
+  >
+  _claim(String code) async {
     try {
-      final res = await _apiClient
+      final lookup = await _apiClient
           .dio(ApiService.coupon)
           .get(AppApi.voucher.campaignByCode(code));
-      final ok = (res.statusCode ?? 0) >= 200 && (res.statusCode ?? 0) < 300;
-      return (success: ok, message: null);
+      final lookupOk =
+          (lookup.statusCode ?? 0) >= 200 && (lookup.statusCode ?? 0) < 300;
+      if (!lookupOk) {
+        return (
+          success: false,
+          message: null,
+          campaignName: null,
+          merchantName: null,
+        );
+      }
+
+      final data = lookup.data is Map ? lookup.data as Map : const {};
+      final campaignId = data['id'] as String?;
+      final campaignName = data['name'] as String?;
+      final merchantName = data['merchantName'] as String?;
+      if (campaignId == null || campaignId.isEmpty) {
+        return (
+          success: false,
+          message: null,
+          campaignName: campaignName,
+          merchantName: merchantName,
+        );
+      }
+
+      final claim = await _apiClient
+          .dio(ApiService.coupon)
+          .post(
+            AppApi.voucher.voucherClaims,
+            data: {'campaignId': campaignId},
+          );
+      final claimOk =
+          (claim.statusCode ?? 0) >= 200 && (claim.statusCode ?? 0) < 300;
+      if (claimOk) markVoucherWalletDirty();
+      return (
+        success: claimOk,
+        message: null,
+        campaignName: campaignName,
+        merchantName: merchantName,
+      );
     } on DioException catch (e) {
-      return (success: false, message: _mapError(e));
+      return (
+        success: false,
+        message: _mapError(e),
+        campaignName: null,
+        merchantName: null,
+      );
     } catch (_) {
-      return (success: false, message: null);
+      return (
+        success: false,
+        message: null,
+        campaignName: null,
+        merchantName: null,
+      );
     }
   }
 
@@ -167,6 +224,8 @@ class VoucherClaimCubit extends Cubit<VoucherClaimState> {
           code: code,
           success: res.success,
           message: res.message,
+          campaignName: res.campaignName,
+          merchantName: res.merchantName,
         ),
       ),
     );

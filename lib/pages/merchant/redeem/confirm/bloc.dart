@@ -2,52 +2,53 @@ import '../../../../import.dart';
 
 class MerchantRedeemConfirmState {
   const MerchantRedeemConfirmState({
-    this.isLoading = false,
     this.isSubmitting = false,
-    this.couponTitle,
-    this.userName,
+    this.verifyData = const {},
     this.success = false,
     this.error,
   });
 
-  final bool isLoading;
   final bool isSubmitting;
-  final String? couponTitle;
-  final String? userName;
+  final Map<String, dynamic> verifyData;
   final bool success;
   final String? error;
 
   MerchantRedeemConfirmState copyWith({
-    bool? isLoading,
     bool? isSubmitting,
-    String? couponTitle,
-    String? userName,
+    Map<String, dynamic>? verifyData,
     bool? success,
     String? error,
+    bool clearError = false,
   }) {
     return MerchantRedeemConfirmState(
-      isLoading: isLoading ?? this.isLoading,
       isSubmitting: isSubmitting ?? this.isSubmitting,
-      couponTitle: couponTitle ?? this.couponTitle,
-      userName: userName ?? this.userName,
+      verifyData: verifyData ?? this.verifyData,
       success: success ?? this.success,
-      error: error,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
 
+/// Cubit xác nhận đổi mã — nhận verifyData đã fetch sẵn từ scanner bloc.
+///
+/// Không cần gọi API verify lần 2 vì scanner đã verify trước khi navigate.
+/// `confirm()` thực hiện đổi mã thật (hiện mock, TODO: thay bằng API thật).
 class MerchantRedeemConfirmCubit extends Cubit<MerchantRedeemConfirmState> {
-  MerchantRedeemConfirmCubit() : super(const MerchantRedeemConfirmState());
+  MerchantRedeemConfirmCubit({
+    required ApiClient apiClient,
+    required Map<String, dynamic> initialData,
+  })  : _apiClient = apiClient, // ignore: prefer_initializing_formals
+        super(MerchantRedeemConfirmState(verifyData: initialData));
 
-  Future<void> load(String code) async {
-    emit(state.copyWith(isLoading: true));
-    // TODO: lookup coupon + user by QR code
-    emit(state.copyWith(isLoading: false));
-  }
+  // Retained for when the real redeem API is wired up.
+  // ignore: unused_field
+  final ApiClient _apiClient;
 
   Future<void> confirm(String code) async {
-    emit(state.copyWith(isSubmitting: true));
-    // TODO: call claim/redeem API
+    if (state.isSubmitting) return;
+    emit(state.copyWith(isSubmitting: true, clearError: true));
+    // TODO: thay bằng POST /vouchers/redeem {"token": code}
+    await Future.delayed(const Duration(milliseconds: 800));
     emit(state.copyWith(isSubmitting: false, success: true));
   }
 }

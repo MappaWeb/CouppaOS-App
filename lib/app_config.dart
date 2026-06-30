@@ -69,7 +69,7 @@ Future<void> bootstrap(SharedMonitoring monitoring) async {
       GlobalCupertinoLocalizations.delegate,
     ],
     routerConfig: AppRouter.router,
-    downloadFolderName: 'CouppaMiniOS',
+    downloadFolderName: 'CouppaOS',
     boxes: const ['auth_cache', 'merchant_cache', 'reference_cache'],
     providers: [
       RepositoryProvider<ApiClient>.value(value: apiClient),

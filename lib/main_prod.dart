@@ -16,7 +16,7 @@ Future<void> main() async {
 
   AppFlavorConfig.initialize(const AppFlavorConfig(
     flavor: AppFlavor.prod,
-    appName: 'CouppaMiniOS',
+    appName: 'CouppaOS',
     apiDomain: apiDomain,
     enableLogging: false,
     enableCrashlytics: true,

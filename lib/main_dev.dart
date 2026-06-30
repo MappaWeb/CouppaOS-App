@@ -8,7 +8,7 @@ Future<void> main() async {
 
   AppFlavorConfig.initialize(const AppFlavorConfig(
     flavor: AppFlavor.dev,
-    appName: 'CouppaMiniOS DEV',
+    appName: 'CouppaOS DEV',
     apiDomain: 'api-qr.iotcommunication.net',
     enableLogging: true,
     enableCrashlytics: false,

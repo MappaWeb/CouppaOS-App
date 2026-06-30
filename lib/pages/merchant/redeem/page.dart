@@ -8,62 +8,49 @@ class MerchantRedeemPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MerchantRedeemCubit(),
+      create: (ctx) => MerchantRedeemCubit(apiClient: ctx.read<ApiClient>()),
       child: const _MerchantRedeemView(),
     );
   }
 }
 
-class _MerchantRedeemView extends StatefulWidget {
+class _MerchantRedeemView extends StatelessWidget {
   const _MerchantRedeemView();
 
-  @override
-  State<_MerchantRedeemView> createState() => _MerchantRedeemViewState();
-}
+  Future<void> _showManualInput(BuildContext context) async {
+    String inputValue = '';
 
-class _MerchantRedeemViewState extends State<_MerchantRedeemView> {
-  Key _scannerKey = UniqueKey();
-
-  void _onCodeDetected(String code) {
-    final cubit = context.read<MerchantRedeemCubit>();
-    cubit.onScanned(code);
-  }
-
-  Future<void> _showManualInput() async {
-    final controller = TextEditingController();
-    final code = await showDialog<String>(
+    await AppDialogs.showActionDialog(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text('Nhập mã coupon'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(
-              hintText: 'Nhập mã thủ công',
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (value) => Navigator.of(ctx).pop(value.trim()),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Huỷ'),
-            ),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.of(ctx).pop(controller.text.trim()),
-              child: const Text('Xác nhận'),
-            ),
-          ],
-        );
-      },
+      labelText: 'Nhập mã coupon',
+      showCloseButton: false,
+      content: StatefulBuilder(
+        builder: (ctx, setState) => FieldText(
+          value: inputValue,
+          onChanged: (v) => inputValue = v,
+          hintText: 'Nhập mã thủ công',
+          labelText: 'Mã coupon',
+          autofocus: true,
+          textCapitalization: TextCapitalization.characters,
+          onSubmitted: (_) => appNavigator.pop(),
+        ),
+      ),
+      actions: [
+        BaseButton.outlined(
+          onPressed: appNavigator.pop,
+          child: const Text('Huỷ'),
+        ),
+        BaseButton(
+          onPressed: appNavigator.pop,
+          child: const Text('Xác nhận'),
+        ),
+      ],
     );
 
-    if (!mounted) return;
-    if (code != null && code.isNotEmpty) {
-      _onCodeDetected(code);
+    final code = inputValue.trim();
+    if (code.isNotEmpty) {
+      if (!context.mounted) return;
+      context.read<MerchantRedeemCubit>().onScanned(code);
     }
   }
 
@@ -78,39 +65,68 @@ class _MerchantRedeemViewState extends State<_MerchantRedeemView> {
           'Quét mã coupon',
           style: TextStyle(color: Colors.white),
         ),
-        leading: IconButton(onPressed: (){
-          appNavigator.pop();
-        }, icon: Icon(Icons.arrow_back, color: Colors.white,)),
+        leading: IconButton(
+          onPressed: appNavigator.pop,
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+        ),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
       body: BlocConsumer<MerchantRedeemCubit, MerchantRedeemState>(
-        listenWhen: (p, c) => p.lastScannedCode != c.lastScannedCode,
+        listenWhen: (p, c) =>
+            (p.verifyData == null && c.verifyData != null) ||
+            (p.error != c.error && c.error != null),
         listener: (context, state) async {
-          if (state.lastScannedCode != null) {
+          if (state.error != null) {
+            showMessage(state.error!, type: 'error');
+            return;
+          }
+          if (state.verifyData != null) {
             await appNavigator.pushNamed(
               RouterConstants.merchantRedeemConfirm,
-              arguments: {'code': state.lastScannedCode},
+              arguments: {
+                'code': state.checkedCode ?? '',
+                'verifyData': state.verifyData,
+              },
             );
             if (!context.mounted) return;
             context.read<MerchantRedeemCubit>().resume();
-            setState(() => _scannerKey = UniqueKey());
           }
         },
         builder: (context, state) {
-          final processing = !state.isScanning;
           return Stack(
             children: [
               Positioned.fill(
                 child: QrScannerView(
-                  key: _scannerKey,
-                  isProcessing: processing,
+                  isProcessing: state.isProcessing,
                   hintText: 'Đưa mã QR coupon vào khung để quét',
-                  onCodeDetected: _onCodeDetected,
+                  onCodeDetected: (code) =>
+                      context.read<MerchantRedeemCubit>().onScanned(code),
                 ),
               ),
+              // Overlay loading khi đang gọi verify API
+              if (state.isChecking)
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: Colors.black54,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(color: Colors.white),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Đang kiểm tra mã...',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               Positioned(
                 left: 16,
                 right: 16,
@@ -124,7 +140,9 @@ class _MerchantRedeemViewState extends State<_MerchantRedeemView> {
                         foregroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onPressed: processing ? null : _showManualInput,
+                      onPressed: state.isProcessing
+                          ? null
+                          : () => _showManualInput(context),
                       icon: const Icon(Icons.keyboard_alt_outlined),
                       label: const Text('Nhập mã thủ công'),
                     ),

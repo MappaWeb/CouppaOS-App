@@ -10,11 +10,13 @@ class NavItem {
     required this.label,
     required this.path,
     required this.icon,
+    required this.symbol,
   });
 
   final String label;
   final String path;
   final IconData icon;
+  final String symbol;
 }
 
 class MyApp extends StatefulWidget {
@@ -36,16 +38,19 @@ class _MyAppState extends State<MyApp> {
             label: 'Coupon của tôi',
             path: '/User/Coupon',
             icon: Icons.confirmation_number_outlined,
+            symbol: 'ticket',
           ),
           NavItem(
             label: 'Nhận voucher',
             path: '/User/VoucherClaim',
             icon: Icons.redeem_outlined,
+            symbol: 'gift',
           ),
           NavItem(
             label: 'Tài khoản',
             path: '/Account',
             icon: Icons.person_outline,
+            symbol: 'person.crop.circle',
           ),
         ];
       case UserRole.merchant:
@@ -54,21 +59,25 @@ class _MyAppState extends State<MyApp> {
             label: 'Chiến dịch',
             path: '/Merchant/Coupon',
             icon: Icons.local_offer_outlined,
+            symbol: 'tag',
           ),
           NavItem(
             label: 'Hợp tác',
             path: '/Merchant/Partners',
             icon: Icons.handshake_outlined,
+            symbol: 'person.2',
           ),
           NavItem(
             label: 'Báo cáo',
             path: '/Merchant/Report',
             icon: Icons.insert_chart_outlined,
+            symbol: 'chart.bar',
           ),
           NavItem(
             label: 'Tài khoản',
             path: '/Account',
             icon: Icons.person_outline,
+            symbol: 'person.crop.circle',
           ),
         ];
     }
@@ -125,6 +134,7 @@ class _MyAppState extends State<MyApp> {
                         GlassBarItem(
                           icon: item.icon,
                           label: item.label,
+                          nativeSymbolName: item.symbol,
                         ),
                     ],
                     currentIndex: currentIndex,
@@ -136,6 +146,9 @@ class _MyAppState extends State<MyApp> {
                       pillFilmEnd: 0.52,
                       pillBorderOpacity: 0.22,
                       backdropSaturation: 1.2,
+                      iconSize: 16,
+                      nativeIconPointSize: 14,
+                      nativeIconWeight: 'regular',
                     ),
                   ),
                 ),

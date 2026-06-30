@@ -37,8 +37,16 @@ class _VoucherClaimViewState extends State<_VoucherClaimView> {
     final title = payload.success
         ? l10n.voucherClaim_dialogSuccess
         : l10n.voucherClaim_dialogFail;
+    final voucherLabel = payload.campaignName?.trim().isNotEmpty == true
+        ? payload.campaignName!
+        : payload.code;
+    final successBody = payload.merchantName?.trim().isNotEmpty == true
+        ? '“$voucherLabel” (${payload.merchantName}) đã được thêm vào ví. '
+              'Mở “Coupon của tôi” để xem ngay.'
+        : '“$voucherLabel” đã được thêm vào ví. '
+              'Mở “Coupon của tôi” để xem ngay.';
     final message = payload.success
-        ? l10n.voucherClaim_dialogSuccessMessage(payload.code)
+        ? successBody
         : (payload.message?.isNotEmpty == true
               ? payload.message!
               : l10n.voucherClaim_dialogFailMessage(payload.code));
@@ -60,6 +68,18 @@ class _VoucherClaimViewState extends State<_VoucherClaimView> {
         cubit.pauseQr();
         appNavigator.pop();
       },
+      actions: payload.success
+          ? [
+              BaseButton(
+                onPressed: () {
+                  appNavigator.pop();
+                  cubit.pauseQr();
+                  appNavigator.go(RouterConstants.userCoupon);
+                },
+                child: const Text('Xem ví voucher'),
+              ),
+            ]
+          : null,
     );
   }
 
@@ -243,7 +263,7 @@ class _ManualPanel extends StatelessWidget {
         children: [
           FieldText(
             value: state.input,
-            labelText: l10n.voucherClaim_inputLabel,
+            labelText: 'Mã chiến dịch',
             hintText: l10n.voucherClaim_inputHint,
             maxLines: null,
             minLines: 8,

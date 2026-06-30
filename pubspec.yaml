@@ -50,6 +50,8 @@ dependencies:
 
 
 dependency_overrides:
+  glass_bottom_navigation:
+    path: packages/glass_bottom_navigation
   flutter_lints: ^6.0.0
   firebase_core: ^4.0.0
   firebase_analytics: ^12.0.0

@@ -29,6 +29,12 @@ bool get canSwitchView => getAccountRole() == UserRole.merchant;
 /// Reset chế độ xem về mặc định (gọi khi logout / đổi tài khoản).
 void resetViewMode() => viewAsUser.value = false;
 
+/// Tick mỗi khi ví voucher của user thay đổi (vd: nhận voucher thành công).
+/// `UserCouponPage` lắng nghe để refresh `MyVoucherListBloc` mà không cần
+/// đẩy event xuyên branch của shell.
+final ValueNotifier<int> voucherWalletDirty = ValueNotifier<int>(0);
+void markVoucherWalletDirty() => voucherWalletDirty.value++;
+
 /// Role hiệu lực dùng cho điều hướng và UI. Merchant có thể tạm thời
 /// hạ xuống view user qua [viewAsUser]; các role khác giữ nguyên.
 UserRole getRole() {

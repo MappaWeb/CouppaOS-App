@@ -35,7 +35,11 @@ class _MerchantCouponView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SystemListScaffold<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(
+    return SystemListScaffold<
+      MerchantCouponListBloc,
+      SystemListState<VoucherModel>,
+      VoucherModel
+    >(
       backgroundColor: Palette.cardColor,
       appBar: BaseAppBar(
         context: context,
@@ -43,7 +47,11 @@ class _MerchantCouponView extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       searchBarOption:
-          SearchBarOption<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(
+          SearchBarOption<
+            MerchantCouponListBloc,
+            SystemListState<VoucherModel>,
+            VoucherModel
+          >(
             hintText: 'Tìm theo mã / tên',
             extraFilters: (getFilter, onChanged) => Column(
               spacing: 12,

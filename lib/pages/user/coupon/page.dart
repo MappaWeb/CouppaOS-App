@@ -17,8 +17,36 @@ class UserCouponPage extends StatelessWidget {
   }
 }
 
-class _UserCouponView extends StatelessWidget {
+class _UserCouponView extends StatefulWidget {
   const _UserCouponView();
+
+  @override
+  State<_UserCouponView> createState() => _UserCouponViewState();
+}
+
+class _UserCouponViewState extends State<_UserCouponView> {
+  int _lastDirtyTick = voucherWalletDirty.value;
+
+  @override
+  void initState() {
+    super.initState();
+    voucherWalletDirty.addListener(_onWalletDirty);
+  }
+
+  @override
+  void dispose() {
+    voucherWalletDirty.removeListener(_onWalletDirty);
+    super.dispose();
+  }
+
+  void _onWalletDirty() {
+    if (!mounted) return;
+    if (voucherWalletDirty.value == _lastDirtyTick) return;
+    _lastDirtyTick = voucherWalletDirty.value;
+    context
+        .read<MyVoucherListBloc>()
+        .add(RefreshBaseList(clearItems: false));
+  }
 
   @override
   Widget build(BuildContext context) {
