@@ -16,6 +16,10 @@ class MerchantCouponDetailPage extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => MerchantCouponDetailBloc(id)),
         BlocProvider(create: (_) => MerchantCouponDetailCodesBloc(id)),
+        BlocProvider(
+          create: (ctx) =>
+              MerchantCouponGenerateCubit(apiClient: ctx.read<ApiClient>(), campaignId: id),
+        ),
       ],
       child: _Content(id: id),
     );
@@ -31,33 +35,91 @@ class _Content extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: SystemDetailScaffold<MerchantCouponDetailBloc>(
-        scaffoldBackgroundColor: AppColors.white,
-        appBar: BaseAppBar(
-          context: context,
-          centerTitle: false,
-          title: const Text('Chi tiết chiến dịch'),
-          // actions: [_DetailMenu(id: id)],
-          bottom: const TabBar(
-            indicatorSize: TabBarIndicatorSize.tab,
-            labelColor: Palette.primary,
-            unselectedLabelColor: Palette.textPrimary3,
-            indicatorColor: Palette.primary,
-            tabs: [
-              Tab(text: 'Thông tin'),
-              Tab(text: 'Danh sách mã'),
-            ],
+      child: Stack(
+        children: [
+          SystemDetailScaffold<MerchantCouponDetailBloc>(
+            scaffoldBackgroundColor: AppColors.white,
+            appBar: BaseAppBar(
+              context: context,
+              centerTitle: false,
+              title: const Text('Chi tiết chiến dịch'),
+              // actions: [_DetailMenu(id: id)],
+              bottom: const TabBar(
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelColor: Palette.primary,
+                unselectedLabelColor: Palette.textPrimary3,
+                indicatorColor: Palette.primary,
+                tabs: [
+                  Tab(text: 'Thông tin'),
+                  Tab(text: 'Danh sách mã'),
+                ],
+              ),
+            ),
+            builder: (context, state, response) {
+              return TabBarView(
+                children: [
+                  _InfoTab(data: response),
+                  _CodesTab(campaignData: response),
+                ],
+              );
+            },
           ),
-        ),
-        builder: (context, state, response) {
-          return TabBarView(
-            children: [
-              _InfoTab(data: response),
-              const _CodesTab(),
-            ],
-          );
-        },
+          const _GenerateLoadingOverlay(),
+        ],
       ),
+    );
+  }
+}
+
+class _GenerateLoadingOverlay extends StatelessWidget {
+  const _GenerateLoadingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MerchantCouponGenerateCubit, MerchantCouponGenerateState>(
+      buildWhen: (prev, curr) => prev.loading != curr.loading,
+      builder: (context, state) {
+        if (!state.loading) return const SizedBox.shrink();
+        return Positioned.fill(
+          child: AbsorbPointer(
+            absorbing: true,
+            child: ColoredBox(
+              color: Colors.black.withValues(alpha: 0.35),
+              child: Center(
+                child: Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Palette.primary,
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'Đang sinh mã...',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Palette.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -349,17 +411,200 @@ class _IssuedProgress extends StatelessWidget {
 // Tab 2 — Danh sách mã
 // ============================================================
 
-class _CodesTab extends StatelessWidget {
-  const _CodesTab();
+class _CodesTab extends StatefulWidget {
+  const _CodesTab({required this.campaignData});
+
+  final Map campaignData;
+
+  @override
+  State<_CodesTab> createState() => _CodesTabState();
+}
+
+class _CodesTabState extends State<_CodesTab> {
+  static int _parseInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SystemListView<MerchantCouponDetailCodesBloc, SystemListState<Map>, Map>(
-      padding: .symmetric(vertical: 12),
-      detailBuilder: (context, item, isSelected) => _CodeItem(item: item),
-      bottomSlivers: [
-        SliverToBoxAdapter(child: SizedBox(height: MediaQuery.paddingOf(context).bottom)),
-      ],
+    final issueMode = (widget.campaignData['issueMode'] ?? '').toString().toUpperCase();
+    final totalQuantity = _parseInt(widget.campaignData['totalQuantity']);
+    final isCampaignMode = issueMode == 'CAMPAIGN';
+
+    return BlocListener<MerchantCouponGenerateCubit, MerchantCouponGenerateState>(
+      listener: (context, state) {
+        if (state.success) {
+          context.read<MerchantCouponDetailCodesBloc>().add(RefreshBaseList());
+          context.read<MerchantCouponDetailBloc>().add(RefreshBaseDetail());
+          showMessage('Sinh mã thành công', type: 'success');
+        } else if (state.error != null) {
+          showMessage(state.error!, type: 'error');
+        }
+      },
+      child: SystemListView<MerchantCouponDetailCodesBloc, SystemListState<Map>, Map>(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        detailBuilder: (context, item, isSelected) => _CodeItem(item: item),
+        topSlivers: [
+          if (isCampaignMode)
+            SliverToBoxAdapter(child: _GeneratePanel(totalQuantity: totalQuantity)),
+        ],
+        bottomSlivers: [
+          SliverToBoxAdapter(child: SizedBox(height: MediaQuery.paddingOf(context).bottom)),
+        ],
+      ),
+    );
+  }
+}
+
+class _GeneratePanel extends StatefulWidget {
+  const _GeneratePanel({required this.totalQuantity});
+
+  final int totalQuantity;
+
+  @override
+  State<_GeneratePanel> createState() => _GeneratePanelState();
+}
+
+class _GeneratePanelState extends State<_GeneratePanel> {
+  final _ctrl = TextEditingController();
+  String? _validationError;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  int _remainingFor(int generated) => widget.totalQuantity - generated;
+
+  void _onChanged(String value, int remaining) {
+    final qty = int.tryParse(value.trim());
+    String? err;
+    if (qty != null && qty > 0 && qty > remaining) {
+      err = 'Vượt quá quota: chỉ còn $remaining mã có thể sinh';
+    }
+    if (err != _validationError) setState(() => _validationError = err);
+  }
+
+  void _submit(BuildContext context) {
+    final qty = int.tryParse(_ctrl.text.trim());
+    if (qty == null || qty <= 0) return;
+    if (_validationError != null) return;
+    _ctrl.clear();
+    setState(() => _validationError = null);
+    context.read<MerchantCouponGenerateCubit>().generate(qty);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MerchantCouponDetailCodesBloc, SystemListState<Map>>(
+      buildWhen: (prev, curr) =>
+          prev.totalItems != curr.totalItems || prev.originItems.length != curr.originItems.length,
+      builder: (context, codesState) {
+        final generated = codesState.totalItems ?? codesState.originItems.length;
+        final remaining = _remainingFor(generated);
+        return Container(
+          margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Palette.borderColor),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.confirmation_number_outlined, size: 16, color: Palette.primary),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Sinh mã voucher',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Còn lại: $remaining / ${widget.totalQuantity}',
+                    style: const TextStyle(fontSize: 12, color: Palette.textPrimary2),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _ctrl,
+                      keyboardType: TextInputType.number,
+                      onChanged: (v) => _onChanged(v, remaining),
+                      decoration: InputDecoration(
+                        hintText: 'Số lượng mã cần sinh',
+                        hintStyle: const TextStyle(fontSize: 13, color: Palette.textPrimary3),
+                        errorText: _validationError,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Palette.borderColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Palette.borderColor),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Palette.primary, width: 1.5),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Palette.redTxtColor),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Palette.redTxtColor, width: 1.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  BlocBuilder<MerchantCouponGenerateCubit, MerchantCouponGenerateState>(
+                    builder: (context, genState) {
+                      final canSubmit = !genState.loading && _validationError == null;
+                      return SizedBox(
+                        height: 40,
+                        child: ElevatedButton(
+                          onPressed: canSubmit ? () => _submit(context) : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Palette.primary,
+                            disabledBackgroundColor: Palette.borderColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: genState.loading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('Sinh mã', style: TextStyle(fontSize: 13)),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
