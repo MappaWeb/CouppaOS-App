@@ -22,8 +22,8 @@ class VoucherCodeStatusBadge extends StatelessWidget {
       // case 'RESERVED':
       //   return isLarge ? AppStatus.warningLarge(label) : AppStatus.warning(label);
 
-      // case 'AVAILABLE':
-      //   return isLarge ? AppStatus.informationLarge(label) : AppStatus.information(label);
+      case 'AVAILABLE':
+        return isLarge ? AppStatus.informationLarge(label) : AppStatus.information(label);
 
       // case 'CANCELLED':
       //   return isLarge ? AppStatus.errorLarge(label) : AppStatus.error(label);
@@ -36,8 +36,8 @@ class VoucherCodeStatusBadge extends StatelessWidget {
 
   static String _label(String upper) {
     switch (upper) {
-      // case 'AVAILABLE':
-      //   return 'Sẵn sàng';
+      case 'AVAILABLE':
+        return 'Sẵn sàng';
       // case 'RESERVED':
       //   return 'Đang giữ chỗ';
       case 'ISSUED':
