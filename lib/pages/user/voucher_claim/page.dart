@@ -24,10 +24,28 @@ class _VoucherClaimView extends StatefulWidget {
 class _VoucherClaimViewState extends State<_VoucherClaimView> {
   Key _scannerKey = UniqueKey();
 
+  Future<void> _goToClaim(Map campaign) async {
+    final cubit = context.read<VoucherClaimCubit>();
+    cubit.consumePendingCampaign();
+    cubit.pauseQr(); // dừng quét khi đang ở màn claim
+    await appNavigator.pushNamed(
+      RouterConstants.userVoucherCampaign,
+      arguments: campaign,
+    );
+    if (!mounted) return;
+    cubit.resumeQr();
+    setState(() => _scannerKey = UniqueKey());
+  }
+
   void _onSummaryShown(VoucherClaimSummary s) {
     final l10n = context.l10n;
-    final type = s.success == s.total && s.total > 0 ? 'success' : 'error';
-    showMessage(l10n.voucherClaim_summary(s.success, s.total), type: type);
+    final ok = s.success == s.total && s.total > 0;
+    final message = ok
+        ? l10n.voucherClaim_summary(s.success, s.total)
+        : (s.error?.isNotEmpty == true
+              ? s.error!
+              : l10n.voucherClaim_summary(s.success, s.total));
+    showMessage(message, type: ok ? 'success' : 'error');
     context.read<VoucherClaimCubit>().consumeSummary();
   }
 
@@ -100,8 +118,13 @@ class _VoucherClaimViewState extends State<_VoucherClaimView> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: BlocConsumer<VoucherClaimCubit, VoucherClaimState>(
           listenWhen: (p, c) =>
-              p.summary != c.summary || p.dialog != c.dialog,
+              p.summary != c.summary ||
+              p.dialog != c.dialog ||
+              p.pendingCampaign != c.pendingCampaign,
           listener: (_, state) {
+            if (state.pendingCampaign != null) {
+              _goToClaim(state.pendingCampaign!);
+            }
             if (state.summary != null) _onSummaryShown(state.summary!);
             if (state.dialog != null) _showResultDialog(state.dialog!);
           },
@@ -263,7 +286,7 @@ class _ManualPanel extends StatelessWidget {
         children: [
           FieldText(
             value: state.input,
-            labelText: 'Mã chiến dịch',
+            labelText: 'Mã voucher',
             hintText: l10n.voucherClaim_inputHint,
             maxLines: null,
             minLines: 8,

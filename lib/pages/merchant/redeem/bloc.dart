@@ -77,20 +77,9 @@ class MerchantRedeemCubit extends Cubit<MerchantRedeemState> {
           ? res.data as Map<String, dynamic>
           : <String, dynamic>{};
 
-      // Một số API trả `isValid: false` cho mã hết hạn/đã dùng trên 2xx.
-      final isValid = data['isValid'] as bool? ?? true;
-      if (!isValid) {
-        final msg = data['message']?.toString() ??
-            'Mã không hợp lệ hoặc đã hết hạn';
-        _lastCode = null;
-        emit(state.copyWith(
-          scanStatus: MerchantScanStatus.idle,
-          error: msg,
-          clearVerifyData: true,
-        ));
-        return;
-      }
-
+      // Luôn điều hướng sang trang xác nhận: trang đó hiển thị đầy đủ thông tin
+      // verify + badge hợp lệ/không hợp lệ và chỉ bật nút đổi khi
+      // `redeemable && belongsToMerchant`.
       emit(state.copyWith(
         scanStatus: MerchantScanStatus.idle,
         verifyData: {'token': code, ...data},

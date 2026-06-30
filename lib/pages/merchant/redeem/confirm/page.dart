@@ -33,9 +33,10 @@ class _MerchantRedeemConfirmView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Palette.bgColor,
       appBar: BaseAppBar(
         context: context,
-        title: const Text('Xác nhận sử dụng coupon'),
+        title: const Text('Xác nhận đổi mã'),
       ),
       body: BlocConsumer<MerchantRedeemConfirmCubit, MerchantRedeemConfirmState>(
         listenWhen: (p, c) =>
@@ -60,7 +61,7 @@ class _MerchantRedeemConfirmView extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Xác nhận thành công!'),
+        title: const Text('Đổi mã thành công!'),
         content: const Text('Voucher đã được sử dụng thành công.'),
         actions: [
           TextButton(
@@ -92,112 +93,190 @@ class _VerifyBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = state.verifyData;
-    final couponName =
-        _extract(data, ['campaign.name', 'coupon.name', 'couponName', 'name', 'title']);
-    final userName = _extract(
-        data, ['user.name', 'holder.name', 'owner.name', 'customerName', 'userName']);
-    final discount = _extract(data, ['discount', 'discountValue', 'voucherValue', 'value']);
-    final expiresAt = _extract(data, ['expiresAt', 'expiredAt', 'expires_at']);
-    final status = _extract(data, ['status', 'codeStatus']);
-    final isValid = data['isValid'] as bool? ?? true;
+    final canRedeem = state.canRedeem;
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Validity badge
-                  Row(
+    final campaignName = data['campaignName']?.toString();
+    final faceValue = _formatFaceValue(data['faceValue']);
+    final note = data['note']?.toString();
+    final status = _statusLabel(data['status']?.toString());
+    final hasCustomer = state.hasCustomer;
+    final phone = hasCustomer ? data['customerPhone']?.toString() : null;
+
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _StatusBanner(
+                  canRedeem: canRedeem,
+                  title: state.invalidTitle,
+                  reason: state.invalidReason,
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Palette.cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Palette.borderColor),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 4),
+                  child: Column(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isValid
-                              ? Colors.green.withValues(alpha: 0.12)
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .error
-                                  .withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
+                      _InfoRow(label: 'Mã', value: code, mono: true),
+                      if (campaignName != null)
+                        _InfoRow(label: 'Chiến dịch', value: campaignName),
+                      if (faceValue != null)
+                        _InfoRow(
+                          label: 'Mệnh giá',
+                          value: faceValue,
+                          valueColor: Palette.primary,
                         ),
-                        child: Text(
-                          isValid ? 'Hợp lệ' : 'Không hợp lệ',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isValid
-                                ? Colors.green.shade700
-                                : Theme.of(context).colorScheme.error,
-                          ),
-                        ),
+                      _InfoRow(
+                        label: 'Khách hàng',
+                        value: phone ?? 'Chưa có khách nhận',
+                        valueColor: hasCustomer ? null : Palette.textPrimary3,
                       ),
+                      if (status != null)
+                        _InfoRow(label: 'Trạng thái', value: status),
+                      if (note != null && note.isNotEmpty)
+                        _InfoRow(label: 'Ghi chú', value: note),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _InfoRow(label: 'Mã token', value: code),
-                  if (couponName != null)
-                    _InfoRow(label: 'Coupon', value: couponName),
-                  if (userName != null)
-                    _InfoRow(label: 'Người dùng', value: userName),
-                  if (discount != null)
-                    _InfoRow(label: 'Giá trị', value: discount),
-                  if (expiresAt != null)
-                    _InfoRow(label: 'Hạn sử dụng', value: expiresAt),
-                  if (status != null)
-                    _InfoRow(label: 'Trạng thái', value: status),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          const Spacer(),
-          BaseButton(
-            onPressed: state.isSubmitting
+        ),
+        SafeArea(
+          minimum: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: BaseButton(
+            onPressed: (!canRedeem || state.isSubmitting)
                 ? null
-                : () => context
-                    .read<MerchantRedeemConfirmCubit>()
-                    .confirm(code),
+                : () =>
+                    context.read<MerchantRedeemConfirmCubit>().confirm(code),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: Text(
-                  state.isSubmitting ? 'Đang xác nhận...' : 'Xác nhận & Claim'),
+                state.isSubmitting
+                    ? 'Đang đổi mã...'
+                    : canRedeem
+                        ? 'Xác nhận đổi mã'
+                        : 'Không thể đổi mã',
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+        ),
+      ],
+    );
+  }
+
+  static String? _formatFaceValue(dynamic raw) {
+    if (raw == null) return null;
+    final value = num.tryParse(raw.toString());
+    if (value == null) return raw.toString();
+    final s = value.toStringAsFixed(0);
+    final buffer = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buffer.write('.');
+      buffer.write(s[i]);
+    }
+    return '$bufferđ';
+  }
+
+  static String? _statusLabel(String? status) {
+    switch (status) {
+      case null:
+        return null;
+      case 'ISSUED':
+        return 'Đã phát hành';
+      case 'REDEEMED':
+        return 'Đã sử dụng';
+      case 'EXPIRED':
+        return 'Hết hạn';
+      default:
+        return status;
+    }
+  }
+}
+
+class _StatusBanner extends StatelessWidget {
+  const _StatusBanner({
+    required this.canRedeem,
+    required this.title,
+    required this.reason,
+  });
+
+  final bool canRedeem;
+  final String title;
+  final String? reason;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = canRedeem ? Palette.successBgColor : const Color(0xFFFEF2F2);
+    final fg = canRedeem ? Palette.successTxtColor : Palette.redTxtColor;
+    final icon = canRedeem ? Icons.check_circle : Icons.cancel;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: fg.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: fg, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: fg,
+                  ),
+                ),
+                if (!canRedeem && reason != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    reason!,
+                    style: TextStyle(fontSize: 14, color: fg),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
-
-  static String? _extract(Map<String, dynamic> data, List<String> keys) {
-    for (final key in keys) {
-      final parts = key.split('.');
-      dynamic val = data;
-      for (final part in parts) {
-        val = val is Map ? val[part] : null;
-      }
-      if (val != null) return val.toString();
-    }
-    return null;
-  }
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
+  const _InfoRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.mono = false,
+  });
 
   final String label;
   final String value;
+  final Color? valueColor;
+  final bool mono;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -205,14 +284,20 @@ class _InfoRow extends StatelessWidget {
             width: 110,
             child: Text(
               label,
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.outline),
+              style: const TextStyle(color: Palette.textPrimary4),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: valueColor ?? Palette.textPrimary,
+                fontFeatures: mono
+                    ? const [FontFeature.tabularFigures()]
+                    : null,
+                letterSpacing: mono ? 1 : null,
+              ),
             ),
           ),
         ],

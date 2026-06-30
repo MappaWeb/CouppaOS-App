@@ -25,6 +25,7 @@ import 'pages/register/page.dart';
 import 'pages/start/page.dart';
 import 'pages/user/coupon/detail/page.dart';
 import 'pages/user/coupon/page.dart';
+import 'pages/user/voucher_campaign/page.dart';
 import 'pages/user/voucher_claim/page.dart';
 class RouterConstants {
   const RouterConstants._();
@@ -107,6 +108,9 @@ class RouterConstants {
 
   ///Router to [UserCouponPage]
   static String get userCoupon => '/User/Coupon';
+
+  ///Router to [UserVoucherCampaignPage]
+  static String get userVoucherCampaign => '/User/VoucherCampaign';
 
   ///Router to [UserVoucherClaimPage]
   static String get userVoucherClaim => '/User/VoucherClaim';
