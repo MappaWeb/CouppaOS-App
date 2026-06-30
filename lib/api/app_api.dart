@@ -198,6 +198,10 @@ final class _VoucherPaths {
   /// POST /vouchers/claims — Nhận 1 voucher từ campaign (atomic, chống trùng)
   final voucherClaims = _abs('/vouchers/claims');
 
+  /// POST /vouchers/claims/by-code — Nhận voucher trực tiếp theo **mã voucher**
+  /// (khác mã chiến dịch). Body: `{"code": "..."}`.
+  final voucherClaimsByCode = _abs('/vouchers/claims/by-code');
+
   /// GET /vouchers/mine — Voucher đã nhận của tôi (kèm QR cố định)
   final vouchersMine = _abs('/vouchers/mine');
 

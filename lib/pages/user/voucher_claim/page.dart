@@ -39,8 +39,13 @@ class _VoucherClaimViewState extends State<_VoucherClaimView> {
 
   void _onSummaryShown(VoucherClaimSummary s) {
     final l10n = context.l10n;
-    final type = s.success == s.total && s.total > 0 ? 'success' : 'error';
-    showMessage(l10n.voucherClaim_summary(s.success, s.total), type: type);
+    final ok = s.success == s.total && s.total > 0;
+    final message = ok
+        ? l10n.voucherClaim_summary(s.success, s.total)
+        : (s.error?.isNotEmpty == true
+              ? s.error!
+              : l10n.voucherClaim_summary(s.success, s.total));
+    showMessage(message, type: ok ? 'success' : 'error');
     context.read<VoucherClaimCubit>().consumeSummary();
   }
 

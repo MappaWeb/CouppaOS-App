@@ -60,10 +60,10 @@ class AccountPage extends StatelessWidget {
               if (canSwitchView)
                 _SwitchTile(
                   icon: Icons.swap_horiz_rounded,
-                  title: 'Dùng như người dùng',
+                  title: 'Chế độ xem',
                   subtitle: viewAsUser.value
-                      ? 'Đang xem với quyền người dùng'
-                      : 'Đang xem với quyền người bán',
+                      ? 'Đang ở chế độ người dùng — tắt để quay lại người bán'
+                      : 'Bật để duyệt app với giao diện người dùng thường',
                   value: viewAsUser.value,
                   onChanged: (value) => viewAsUser.value = value,
                 ),

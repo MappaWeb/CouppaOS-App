@@ -3,10 +3,17 @@ import '../../../import.dart';
 enum VoucherClaimMode { manual, qr }
 
 class VoucherClaimSummary {
-  const VoucherClaimSummary({required this.success, required this.total});
+  const VoucherClaimSummary({
+    required this.success,
+    required this.total,
+    this.error,
+  });
 
   final int success;
   final int total;
+
+  /// Thông báo lỗi khi nhận thất bại (ưu tiên hiển thị thay vì "0/N").
+  final String? error;
 }
 
 class VoucherClaimDialog {
@@ -137,77 +144,52 @@ class VoucherClaimCubit extends Cubit<VoucherClaimState> {
     return out;
   }
 
-  /// 1) GET `/campaigns/by-code/{code}` để lấy `campaignId` + thông tin hiển thị.
-  /// 2) POST `/vouchers/claims` với body `{"campaignId": ...}` để nhận voucher.
-  /// Cả hai đều 2xx mới coi là thành công; khi đó tick `voucherWalletDirty`
-  /// để tab "Coupon của tôi" tự refresh.
-  Future<
-    ({bool success, String? message, String? campaignName, String? merchantName})
-  >
-  _claim(String code) async {
+  /// POST `/vouchers/claims/by-code` với body `{"code": ...}` — nhận voucher
+  /// trực tiếp theo **mã voucher** (dạng 2, khác mã chiến dịch). 2xx là thành
+  /// công → tick `voucherWalletDirty` để tab "Coupon của tôi" tự refresh.
+  Future<({bool success, String? message})> _claimVoucherCode(
+    String code,
+  ) async {
     try {
-      final lookup = await _apiClient
+      final res = await _apiClient
           .dio(ApiService.coupon)
-          .get(AppApi.voucher.campaignByCode(code));
-      final lookupOk =
-          (lookup.statusCode ?? 0) >= 200 && (lookup.statusCode ?? 0) < 300;
-      if (!lookupOk) {
-        return (
-          success: false,
-          message: null,
-          campaignName: null,
-          merchantName: null,
-        );
-      }
-
-      final data = lookup.data is Map ? lookup.data as Map : const {};
-      final campaignId = data['id'] as String?;
-      final campaignName = data['name'] as String?;
-      final merchantName = data['merchantName'] as String?;
-      if (campaignId == null || campaignId.isEmpty) {
-        return (
-          success: false,
-          message: null,
-          campaignName: campaignName,
-          merchantName: merchantName,
-        );
-      }
-
-      final claim = await _apiClient
-          .dio(ApiService.coupon)
-          .post(
-            AppApi.voucher.voucherClaims,
-            data: {'campaignId': campaignId},
-          );
-      final claimOk =
-          (claim.statusCode ?? 0) >= 200 && (claim.statusCode ?? 0) < 300;
-      if (claimOk) markVoucherWalletDirty();
-      return (
-        success: claimOk,
-        message: null,
-        campaignName: campaignName,
-        merchantName: merchantName,
-      );
+          .post(AppApi.voucher.voucherClaimsByCode, data: {'code': code});
+      final ok = (res.statusCode ?? 0) >= 200 && (res.statusCode ?? 0) < 300;
+      if (ok) markVoucherWalletDirty();
+      return (success: ok, message: null);
     } on DioException catch (e) {
-      return (
-        success: false,
-        message: _mapError(e),
-        campaignName: null,
-        merchantName: null,
-      );
+      return (success: false, message: _mapError(e));
     } catch (_) {
-      return (
-        success: false,
-        message: null,
-        campaignName: null,
-        merchantName: null,
-      );
+      return (success: false, message: null);
     }
   }
+
+  /// Map code lỗi backend → thông báo tiếng Việt (fallback khi không có message).
+  static const _codeMessages = <String, String>{
+    'CAMPAIGN_NOT_ACTIVE': 'Chiến dịch chưa được kích hoạt',
+    'CAMPAIGN_NOT_FOUND': 'Không tìm thấy chiến dịch',
+    'CAMPAIGN_EXPIRED': 'Chiến dịch đã hết hạn',
+    'CAMPAIGN_OUT_OF_SLOTS': 'Chiến dịch đã hết lượt nhận',
+    'VOUCHER_NOT_FOUND': 'Không tìm thấy mã voucher',
+    'VOUCHER_ALREADY_CLAIMED': 'Voucher này đã được nhận',
+    'ALREADY_CLAIMED': 'Bạn đã nhận voucher này rồi',
+  };
 
   static String? _mapError(DioException e) {
     final data = e.response?.data;
     if (data is Map) {
+      // Lỗi lồng: {"error": {"code": ..., "message": ...}}
+      final err = data['error'];
+      if (err is Map) {
+        final msg = err['message'];
+        if (msg is String && msg.isNotEmpty) return msg;
+        final code = err['code'];
+        if (code is String) {
+          final mapped = _codeMessages[code];
+          if (mapped != null) return mapped;
+        }
+      }
+      // Lỗi phẳng: {"message"/"error"/"detail": "..."}
       final msg = data['message'] ?? data['error'] ?? data['detail'];
       if (msg is String && msg.isNotEmpty) return msg;
     }
@@ -222,16 +204,25 @@ class VoucherClaimCubit extends Cubit<VoucherClaimState> {
     emit(state.copyWith(isProcessing: true, clearSummary: true));
 
     var success = 0;
+    String? lastError;
     for (final code in codes) {
-      final res = await _claim(code);
-      if (res.success) success++;
+      final res = await _claimVoucherCode(code);
+      if (res.success) {
+        success++;
+      } else {
+        lastError = res.message;
+      }
     }
 
     emit(
       state.copyWith(
         isProcessing: false,
         input: '',
-        summary: VoucherClaimSummary(success: success, total: codes.length),
+        summary: VoucherClaimSummary(
+          success: success,
+          total: codes.length,
+          error: success == 0 ? lastError : null,
+        ),
       ),
     );
   }
