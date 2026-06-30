@@ -7,12 +7,16 @@ import 'bloc.dart';
 ///
 /// Submit thành công → snackbar success → `pop(true)`. List sẽ refresh.
 class MerchantCouponBatchPage extends StatelessWidget {
-  const MerchantCouponBatchPage({super.key});
+  final Map? args;
+  const MerchantCouponBatchPage(this.args, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MerchantCouponBatchBloc(apiClient: context.read<ApiClient>()),
+      create: (_) => MerchantCouponBatchBloc(
+        apiClient: context.read<ApiClient>(),
+        isQuickCreate: args?['isQuickCreate'] == true,
+      ),
       child: const _MerchantCouponBatchView(),
     );
   }

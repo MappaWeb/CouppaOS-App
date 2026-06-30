@@ -15,20 +15,42 @@ import '../../../../import.dart';
 /// - `partnerIds` String? — comma-separated ids; optional, split khi submit (output `[{merchantId, scope:'all'}]`)
 /// - `note` String? — optional
 class MerchantCouponBatchBloc extends SystemFormBloc<SystemFormState> {
-  MerchantCouponBatchBloc({required ApiClient apiClient})
-    : this._(apiClient);
+  MerchantCouponBatchBloc({
+    required ApiClient apiClient,
+    bool isQuickCreate = false,
+  }) : this._(apiClient, isQuickCreate);
 
-  MerchantCouponBatchBloc._(this._apiClient)
+  MerchantCouponBatchBloc._(this._apiClient, bool isQuickCreate)
     : super(
         rules: _validationRules(),
         initialState: SystemFormState(
           status: SystemFormStateStatus.initial,
-          fields: const {'scope': 'all'},
+          fields: isQuickCreate ? _quickCreateFields() : const {'scope': 'all'},
           data: const {},
         ),
       );
 
   final ApiClient _apiClient;
+
+  static Map<String, dynamic> _quickCreateFields() {
+    final now = DateTime.now();
+    final from = DateTime(now.year, now.month, now.day, now.hour, now.minute);
+    final to = from.add(const Duration(days: 30));
+    return {
+      'name': 'Lô voucher test ${from.day}/${from.month}',
+      'faceValue': '50.000',
+      'quantity': '10',
+      'validFrom': _formatDateTime(from),
+      'validTo': _formatDateTime(to),
+      'scope': 'all',
+      'note': 'Tạo nhanh để test',
+    };
+  }
+
+  static String _formatDateTime(DateTime dt) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(dt.day)}/${two(dt.month)}/${dt.year} ${two(dt.hour)}:${two(dt.minute)}';
+  }
 
   static Map<String, Rules> _validationRules() => {
     'faceValue': Rules(

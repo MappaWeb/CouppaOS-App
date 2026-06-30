@@ -66,7 +66,8 @@ List<RouteBase> get routes => <RouteBase>[
   ),
   GoRoute(
     path: '/Merchant/Coupon/Batch',
-    builder: (context, state) => const MerchantCouponBatchPage(),
+    builder: (context, state) => MerchantCouponBatchPage(state.uri.queryParameters.isNotEmpty
+    ? state.uri.queryParameters : state.extra as Map?),
   ),
   GoRoute(
     path: '/Merchant/Coupon/Campaign',

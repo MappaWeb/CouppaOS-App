@@ -25,9 +25,12 @@ class _MerchantCouponView extends StatelessWidget {
     {'id': 'used', 'title': 'Đã dùng'},
   ];
 
-  Future<void> _open(BuildContext context, String route) async {
+  Future<void> _open(BuildContext context, String route, {bool isQuickCreate = false}) async {
     final bloc = context.read<MerchantCouponListBloc>();
-    final result = await appNavigator.pushNamed(route);
+    final result = await appNavigator.pushNamed(
+      route,
+      arguments: isQuickCreate ? {'isQuickCreate': true} : null,
+    );
     if (result == true) {
       bloc.add(RefreshBaseList());
     }
@@ -35,11 +38,7 @@ class _MerchantCouponView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SystemListScaffold<
-      MerchantCouponListBloc,
-      SystemListState<VoucherModel>,
-      VoucherModel
-    >(
+    return SystemListScaffold<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(
       backgroundColor: Palette.cardColor,
       appBar: BaseAppBar(
         context: context,
@@ -47,11 +46,7 @@ class _MerchantCouponView extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       searchBarOption:
-          SearchBarOption<
-            MerchantCouponListBloc,
-            SystemListState<VoucherModel>,
-            VoucherModel
-          >(
+          SearchBarOption<MerchantCouponListBloc, SystemListState<VoucherModel>, VoucherModel>(
             hintText: 'Tìm theo mã / tên',
             extraFilters: (getFilter, onChanged) => Column(
               spacing: 12,
@@ -137,6 +132,14 @@ class _MerchantCouponView extends StatelessWidget {
             backgroundColor: Palette.primary,
             foregroundColor: Colors.white,
             onTap: () => _open(context, RouterConstants.merchantCouponCampaign),
+          ),
+          SpeedDialChild(
+            child: const Icon(ViIcons.tag),
+            label: 'Tạo nhanh',
+            backgroundColor: Palette.primary,
+            foregroundColor: Colors.white,
+            onTap: () =>
+                _open(context, RouterConstants.merchantCouponBatch, isQuickCreate: true),
           ),
         ],
       ),
