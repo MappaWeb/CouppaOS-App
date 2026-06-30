@@ -33,6 +33,7 @@ class VoucherClaimState {
     this.qrPaused = false,
     this.summary,
     this.dialog,
+    this.pendingCampaign,
   });
 
   final VoucherClaimMode mode;
@@ -45,6 +46,10 @@ class VoucherClaimState {
   final VoucherClaimSummary? summary;
   final VoucherClaimDialog? dialog;
 
+  /// Quét QR + `by-code` thành công → dữ liệu campaign cần điều hướng sang màn
+  /// claim. Page lắng nghe field này để `pushNamed` rồi gọi [consumePendingCampaign].
+  final Map? pendingCampaign;
+
   VoucherClaimState copyWith({
     VoucherClaimMode? mode,
     String? input,
@@ -52,8 +57,10 @@ class VoucherClaimState {
     bool? qrPaused,
     VoucherClaimSummary? summary,
     VoucherClaimDialog? dialog,
+    Map? pendingCampaign,
     bool clearSummary = false,
     bool clearDialog = false,
+    bool clearPendingCampaign = false,
   }) {
     return VoucherClaimState(
       mode: mode ?? this.mode,
@@ -62,6 +69,9 @@ class VoucherClaimState {
       qrPaused: qrPaused ?? this.qrPaused,
       summary: clearSummary ? null : (summary ?? this.summary),
       dialog: clearDialog ? null : (dialog ?? this.dialog),
+      pendingCampaign: clearPendingCampaign
+          ? null
+          : (pendingCampaign ?? this.pendingCampaign),
     );
   }
 }
@@ -101,6 +111,19 @@ class VoucherClaimCubit extends Cubit<VoucherClaimState> {
 
   void setInput(String value) {
     emit(state.copyWith(input: value));
+  }
+
+  /// QR voucher có thể chứa URL dạng `https://qr.iotcommunication.net/r/NBSPSCLKBFTH`.
+  /// Lấy code ở path segment cuối (sau `/r/`). Nếu không phải URL hợp lệ thì
+  /// coi như giá trị đã là code thuần và trả về nguyên trạng (đã trim).
+  static String parseQrCode(String raw) {
+    final value = raw.trim();
+    if (value.isEmpty) return value;
+    final uri = Uri.tryParse(value);
+    if (uri == null || !uri.hasScheme) return value;
+    final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+    if (segments.isEmpty) return value;
+    return segments.last;
   }
 
   List<String> _parseCodes(String raw) {
@@ -213,22 +236,56 @@ class VoucherClaimCubit extends Cubit<VoucherClaimState> {
     );
   }
 
-  Future<void> onQrDetected(String code) async {
+  /// Chỉ tra cứu campaign theo code (`GET /campaigns/by-code/{code}`), KHÔNG
+  /// claim. Thành công → trả về Map dữ liệu campaign để điều hướng sang màn claim.
+  Future<({bool success, String? message, Map? data})> _lookupCampaign(
+    String code,
+  ) async {
+    try {
+      final res = await _apiClient
+          .dio(ApiService.coupon)
+          .get(AppApi.voucher.campaignByCode(code));
+      final ok = (res.statusCode ?? 0) >= 200 && (res.statusCode ?? 0) < 300;
+      final data = res.data is Map ? res.data as Map : null;
+      if (!ok || data == null || (data['id'] ?? '').toString().isEmpty) {
+        return (success: false, message: null, data: null);
+      }
+      return (success: true, message: null, data: data);
+    } on DioException catch (e) {
+      return (success: false, message: _mapError(e), data: null);
+    } catch (_) {
+      return (success: false, message: null, data: null);
+    }
+  }
+
+  /// Quét QR → parse code → tra cứu by-code. Thành công thì set [pendingCampaign]
+  /// để page điều hướng sang màn claim; thất bại thì hiện dialog lỗi, giữ ở scanner.
+  Future<void> onQrDetected(String raw) async {
     if (state.isProcessing) return;
+    final code = parseQrCode(raw);
+    if (code.isEmpty) return;
     emit(state.copyWith(isProcessing: true, clearDialog: true));
-    final res = await _claim(code);
-    emit(
-      state.copyWith(
-        isProcessing: false,
-        dialog: VoucherClaimDialog(
-          code: code,
-          success: res.success,
-          message: res.message,
-          campaignName: res.campaignName,
-          merchantName: res.merchantName,
+    final res = await _lookupCampaign(code);
+    if (res.success && res.data != null) {
+      emit(state.copyWith(isProcessing: false, pendingCampaign: res.data));
+    } else {
+      emit(
+        state.copyWith(
+          isProcessing: false,
+          dialog: VoucherClaimDialog(
+            code: code,
+            success: false,
+            message: res.message,
+          ),
         ),
-      ),
-    );
+      );
+    }
+  }
+
+  /// Page đã điều hướng sang màn claim → xoá tín hiệu để không trigger lại.
+  void consumePendingCampaign() {
+    if (state.pendingCampaign == null) return;
+    emit(state.copyWith(clearPendingCampaign: true));
   }
 
   /// Snackbar summary đã hiển thị, xóa để listener không trigger lại.

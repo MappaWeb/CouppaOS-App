@@ -22,6 +22,7 @@ import 'pages/register/page.dart';
 import 'pages/start/page.dart';
 import 'pages/user/coupon/detail/page.dart';
 import 'pages/user/coupon/page.dart';
+import 'pages/user/voucher_campaign/page.dart';
 import 'pages/user/voucher_claim/page.dart';
 
 List<RouteBase> get routes => <RouteBase>[
@@ -125,6 +126,11 @@ List<RouteBase> get routes => <RouteBase>[
   GoRoute(
     path: '/User/Coupon',
     builder: (context, state) => const UserCouponPage(),
+  ),
+  GoRoute(
+    path: '/User/VoucherCampaign',
+    builder: (context, state) => UserVoucherCampaignPage(state.uri.queryParameters.isNotEmpty
+    ? state.uri.queryParameters : state.extra as Map?),
   ),
   GoRoute(
     path: '/User/VoucherClaim',

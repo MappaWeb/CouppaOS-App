@@ -329,60 +329,56 @@ class _QrScannerViewState extends State<QrScannerView>
                 );
               },
             ),
-            // Hint text below frame
-            if (widget.hintText != null)
-              Positioned(
-                left: 24,
-                right: 24,
-                top: cutOut.bottom + 16,
-                child: Center(
-                  child: Text(
-                    widget.hintText!,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black54,
-                          blurRadius: 4,
-                          offset: Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            // Bottom action bar (torch + gallery)
+            // Bottom controls: hint text above the action bar (torch + gallery),
+            // anchored to the bottom so they never overlap the scan frame.
             Positioned(
               left: 0,
               right: 0,
-              bottom: 100,
+              bottom: 0,
               child: SafeArea(
                 top: false,
-                child: ListenableBuilder(
-                  listenable: _controller,
-                  builder: (context, _) {
-                    final torchOn = _controller.value.torchState == TorchState.on;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _CircleAction(
-                          icon: torchOn ? Icons.flash_on : Icons.flash_off,
-                          highlighted: torchOn,
-                          onTap: _toggleTorch,
-                        ),
-                        if (widget.allowGalleryPick) ...[
-                          const SizedBox(width: 24),
-                          _CircleAction(
-                            icon: Icons.photo_library_outlined,
-                            onTap: _pickFromGallery,
+                minimum: const EdgeInsets.only(bottom: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.hintText != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          widget.hintText!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black54,
+                                blurRadius: 4,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
                           ),
-                        ],
-                      ],
-                    );
-                  },
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+                    ListenableBuilder(
+                      listenable: _controller,
+                      builder: (context, _) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (widget.allowGalleryPick) ...[
+                              _CircleAction(
+                                icon: Icons.photo_library_outlined,
+                                onTap: _pickFromGallery,
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
