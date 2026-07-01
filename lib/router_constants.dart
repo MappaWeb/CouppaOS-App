@@ -13,9 +13,15 @@ import 'pages/merchant/coupon/detail/page.dart';
 import 'pages/merchant/coupon/issue/page.dart';
 import 'pages/merchant/coupon/page.dart';
 import 'pages/merchant/partners/page.dart';
+import 'pages/merchant/profile/location/page.dart';
+import 'pages/merchant/profile/page.dart';
 import 'pages/merchant/redeem/confirm/page.dart';
 import 'pages/merchant/redeem/page.dart';
 import 'pages/merchant/report/page.dart';
+import 'pages/merchant/staff/form/page.dart';
+import 'pages/merchant/staff/list/page.dart';
+import 'pages/merchant/store/form/page.dart';
+import 'pages/merchant/store/list/page.dart';
 import 'pages/otp/page.dart';
 import 'pages/register/page.dart';
 import 'pages/start/page.dart';
@@ -69,6 +75,12 @@ class RouterConstants {
   ///Router to [MerchantPartnersPage]
   static String get merchantPartners => '/Merchant/Partners';
 
+  ///Router to [MerchantProfileLocationPage]
+  static String get merchantProfileLocation => '/Merchant/Profile/Location';
+
+  ///Router to [MerchantProfilePage]
+  static String get merchantProfile => '/Merchant/Profile';
+
   ///Router to [MerchantRedeemConfirmPage]
   static String get merchantRedeemConfirm => '/Merchant/Redeem/Confirm';
 
@@ -77,6 +89,18 @@ class RouterConstants {
 
   ///Router to [MerchantReportPage]
   static String get merchantReport => '/Merchant/Report';
+
+  ///Router to [MerchantStaffFormPage]
+  static String get merchantStaffForm => '/Merchant/Staff/Form';
+
+  ///Router to [MerchantStaffListPage]
+  static String get merchantStaffList => '/Merchant/Staff/List';
+
+  ///Router to [MerchantStoreFormPage]
+  static String get merchantStoreForm => '/Merchant/Store/Form';
+
+  ///Router to [MerchantStoreListPage]
+  static String get merchantStoreList => '/Merchant/Store/List';
 
   ///Router to [OtpPage]
   static String get otp => '/Otp';

@@ -1,48 +1,62 @@
 import '../../import.dart';
 
+enum RegisterResult { success, failure, phoneExists }
+
 class RegisterState {
   const RegisterState({
     this.phone = '',
     this.password = '',
+    this.confirmPassword = '',
     this.phoneError,
     this.passwordError,
+    this.confirmPasswordError,
     this.isSubmitting = false,
     this.obscurePassword = true,
+    this.obscureConfirmPassword = true,
     this.errorMessage,
   });
 
   final String phone;
   final String password;
+  final String confirmPassword;
   final String? phoneError;
   final String? passwordError;
+  final String? confirmPasswordError;
   final bool isSubmitting;
   final bool obscurePassword;
+  final bool obscureConfirmPassword;
   final String? errorMessage;
 
   RegisterState copyWith({
     String? phone,
     String? password,
+    String? confirmPassword,
     String? phoneError,
     String? passwordError,
+    String? confirmPasswordError,
     bool? isSubmitting,
     bool? obscurePassword,
+    bool? obscureConfirmPassword,
     String? errorMessage,
   }) {
     return RegisterState(
       phone: phone ?? this.phone,
       password: password ?? this.password,
+      confirmPassword: confirmPassword ?? this.confirmPassword,
       phoneError: phoneError,
       passwordError: passwordError,
+      confirmPasswordError: confirmPasswordError,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       obscurePassword: obscurePassword ?? this.obscurePassword,
+      obscureConfirmPassword:
+          obscureConfirmPassword ?? this.obscureConfirmPassword,
       errorMessage: errorMessage,
     );
   }
 }
 
 class RegisterCubit extends Cubit<RegisterState> {
-  RegisterCubit({required this._apiClient})
-      : super(const RegisterState());
+  RegisterCubit({required this._apiClient}) : super(const RegisterState());
 
   final ApiClient _apiClient;
 
@@ -51,6 +65,7 @@ class RegisterCubit extends Cubit<RegisterState> {
       phone: value,
       phoneError: null,
       passwordError: state.passwordError,
+      confirmPasswordError: state.confirmPasswordError,
     ));
   }
 
@@ -59,6 +74,16 @@ class RegisterCubit extends Cubit<RegisterState> {
       password: value,
       phoneError: state.phoneError,
       passwordError: null,
+      confirmPasswordError: state.confirmPasswordError,
+    ));
+  }
+
+  void setConfirmPassword(String value) {
+    emit(state.copyWith(
+      confirmPassword: value,
+      phoneError: state.phoneError,
+      passwordError: state.passwordError,
+      confirmPasswordError: null,
     ));
   }
 
@@ -67,29 +92,45 @@ class RegisterCubit extends Cubit<RegisterState> {
       obscurePassword: !state.obscurePassword,
       phoneError: state.phoneError,
       passwordError: state.passwordError,
+      confirmPasswordError: state.confirmPasswordError,
     ));
   }
 
-  /// Trả về `true` nếu đăng ký thành công và sẵn sàng chuyển sang màn OTP.
-  Future<bool> submit() async {
-    if (state.isSubmitting) return false;
+  void toggleConfirmPasswordVisibility() {
+    emit(state.copyWith(
+      obscureConfirmPassword: !state.obscureConfirmPassword,
+      phoneError: state.phoneError,
+      passwordError: state.passwordError,
+      confirmPasswordError: state.confirmPasswordError,
+    ));
+  }
+
+  Future<RegisterResult> submit() async {
+    if (state.isSubmitting) return RegisterResult.failure;
 
     final phone = state.phone.trim();
     final password = state.password;
+    final confirmPassword = state.confirmPassword;
     final phoneError = _validateVnPhone(phone);
     final passwordError = _validatePassword(password);
-    if (phoneError != null || passwordError != null) {
+    final confirmPasswordError =
+        _validateConfirmPassword(password, confirmPassword);
+    if (phoneError != null ||
+        passwordError != null ||
+        confirmPasswordError != null) {
       emit(state.copyWith(
         phoneError: phoneError,
         passwordError: passwordError,
+        confirmPasswordError: confirmPasswordError,
       ));
-      return false;
+      return RegisterResult.failure;
     }
 
     emit(state.copyWith(
       isSubmitting: true,
       phoneError: null,
       passwordError: null,
+      confirmPasswordError: null,
     ));
 
     try {
@@ -99,17 +140,36 @@ class RegisterCubit extends Cubit<RegisterState> {
         data: {'phone': phone, 'password': password},
       );
       emit(state.copyWith(isSubmitting: false));
-      return true;
+      return RegisterResult.success;
     } on DioException catch (e) {
-      emit(state.copyWith(isSubmitting: false, errorMessage: _mapError(e)));
-      return false;
+      final isPhoneExists = _isPhoneExists(e);
+      emit(state.copyWith(
+        isSubmitting: false,
+        errorMessage: isPhoneExists
+            ? 'Số điện thoại đã được đăng ký, vui lòng đăng nhập'
+            : _mapError(e),
+      ));
+      return isPhoneExists ? RegisterResult.phoneExists : RegisterResult.failure;
     } catch (_) {
       emit(state.copyWith(
         isSubmitting: false,
         errorMessage: 'Đăng ký thất bại',
       ));
-      return false;
+      return RegisterResult.failure;
     }
+  }
+
+  static bool _isPhoneExists(DioException e) {
+    final data = e.response?.data;
+    String? code;
+    if (data is Map) {
+      final error = data['error'];
+      if (error is Map) code = error['code']?.toString();
+      code ??= data['code']?.toString() ?? data['errorCode']?.toString();
+    }
+    return code == 'PHONE_EXISTS' ||
+        code == 'USER_EXISTS' ||
+        code == 'USER_ALREADY_EXISTS';
   }
 
   /// Validate số điện thoại Việt Nam.
@@ -146,6 +206,12 @@ class RegisterCubit extends Cubit<RegisterState> {
     if (!RegExp(r'[!@#\$%\^&*]').hasMatch(password)) {
       return 'Mật khẩu cần ít nhất 1 ký tự đặc biệt';
     }
+    return null;
+  }
+
+  static String? _validateConfirmPassword(String password, String confirm) {
+    if (confirm.isEmpty) return 'Vui lòng nhập lại mật khẩu';
+    if (confirm != password) return 'Mật khẩu nhập lại không khớp';
     return null;
   }
 

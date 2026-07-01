@@ -9,6 +9,7 @@ class LoginState {
     this.isSubmitting = false,
     this.obscurePassword = true,
     this.errorMessage,
+    this.otpRequired = false,
   });
 
   final String phone;
@@ -18,6 +19,7 @@ class LoginState {
   final bool isSubmitting;
   final bool obscurePassword;
   final String? errorMessage;
+  final bool otpRequired;
 
   LoginState copyWith({
     String? phone,
@@ -27,6 +29,7 @@ class LoginState {
     bool? isSubmitting,
     bool? obscurePassword,
     String? errorMessage,
+    bool? otpRequired,
   }) {
     return LoginState(
       phone: phone ?? this.phone,
@@ -36,6 +39,7 @@ class LoginState {
       isSubmitting: isSubmitting ?? this.isSubmitting,
       obscurePassword: obscurePassword ?? this.obscurePassword,
       errorMessage: errorMessage,
+      otpRequired: otpRequired ?? false,
     );
   }
 }
@@ -127,7 +131,11 @@ class LoginCubit extends Cubit<LoginState> {
       emit(state.copyWith(isSubmitting: false));
       return true;
     } on DioException catch (e) {
-      emit(state.copyWith(isSubmitting: false, errorMessage: _mapError(e)));
+      if (_isOtpRequired(e)) {
+        emit(state.copyWith(isSubmitting: false, otpRequired: true));
+      } else {
+        emit(state.copyWith(isSubmitting: false, errorMessage: _mapError(e)));
+      }
       return false;
     } catch (_) {
       emit(state.copyWith(
@@ -156,6 +164,14 @@ class LoginCubit extends Cubit<LoginState> {
     return null;
   }
 
+  bool _isOtpRequired(DioException e) {
+    final data = e.response?.data;
+    if (data is! Map) return false;
+    final error = data['error'];
+    if (error is Map) return error['code']?.toString() == 'OTP_REQUIRED';
+    return (data['code']?.toString() ?? data['errorCode']?.toString()) == 'OTP_REQUIRED';
+  }
+
   String _mapError(DioException e) {
     final data = e.response?.data;
     String? code;
@@ -171,8 +187,6 @@ class LoginCubit extends Cubit<LoginState> {
       message ??= data['message']?.toString();
     }
     switch (code) {
-      case 'OTP_REQUIRED':
-        return 'Tài khoản cần xác thực OTP trước khi đăng nhập';
       case 'VALIDATION_ERROR':
         return (message != null && message.isNotEmpty)
             ? message

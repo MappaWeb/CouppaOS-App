@@ -268,6 +268,23 @@ final class _PartnerPaths {
 
   static String _abs(String path) => '$_base$path';
 
+  /// GET /merchants/me — Hồ sơ merchant + danh sách cơ sở
+  final me = _abs('/merchants/me');
+
+  /// PATCH /merchants/me/stores/{id} — Cập nhật cơ sở
+  String storeById(String id) => _abs('/merchants/me/stores/$id');
+
+  /// GET /merchants/me/stores — Danh sách chi nhánh (dùng cho form picker nhân viên)
+  final stores = _abs('/merchants/me/stores');
+
+  /// GET  /merchants/me/staff — Danh sách nhân viên
+  /// POST /merchants/me/staff — Mời nhân viên mới
+  final staff = _abs('/merchants/me/staff');
+
+  /// PATCH  /merchants/me/staff/{id} — Cập nhật vai trò / chi nhánh
+  /// DELETE /merchants/me/staff/{id} — Thu hồi nhân viên
+  String staffById(String id) => _abs('/merchants/me/staff/$id');
+
   /// GET /merchants/me/partners — Đối tác đã liên kết + cơ sở của họ
   final partners = _abs('/merchants/me/partners');
 

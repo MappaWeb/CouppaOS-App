@@ -21,16 +21,21 @@ class _RegisterView extends StatelessWidget {
 
   Future<void> _submit(BuildContext context) async {
     final cubit = context.read<RegisterCubit>();
-    final ok = await cubit.submit();
+    final result = await cubit.submit();
     if (!context.mounted) return;
-    if (ok) {
-      appNavigator.pushNamed(
-        RouterConstants.otp,
-        arguments: {
-          'phone': cubit.state.phone.trim(),
-          'password': cubit.state.password,
-        },
-      );
+    switch (result) {
+      case RegisterResult.success:
+        appNavigator.pushNamed(
+          RouterConstants.otp,
+          arguments: {
+            'phone': cubit.state.phone.trim(),
+            'password': cubit.state.password,
+          },
+        );
+      case RegisterResult.phoneExists:
+        appNavigator.go(RouterConstants.login);
+      case RegisterResult.failure:
+        break;
     }
   }
 
@@ -74,6 +79,8 @@ class _RegisterView extends StatelessWidget {
                   const PasswordValidNoteMap<RegisterCubit, RegisterState>(
                     selector: _passwordSelector,
                   ),
+                  const SizedBox(height: 12),
+                  const _ConfirmPasswordField(),
                   const SizedBox(height: 24),
                   _SubmitButton(onPressed: () => _submit(context)),
                   const SizedBox(height: 24),
@@ -179,6 +186,43 @@ class _PasswordField extends StatelessWidget {
             color: Palette.textPrimary4,
           ),
           onPressed: () => ctx.read<RegisterCubit>().togglePasswordVisibility(),
+        ),
+      ),
+    );
+  }
+}
+
+class _ConfirmPasswordField extends StatelessWidget {
+  const _ConfirmPasswordField();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<RegisterCubit, RegisterState, (String, String?, bool)>(
+      selector: (s) =>
+          (s.confirmPassword, s.confirmPasswordError, s.obscureConfirmPassword),
+      builder: (ctx, sel) => FieldText(
+        value: sel.$1,
+        labelText: 'Nhập lại mật khẩu',
+        hintText: 'Nhập lại mật khẩu',
+        errorText: sel.$2,
+        required: true,
+        obscureText: sel.$3,
+        textInputAction: TextInputAction.done,
+        onChanged: (v) => ctx.read<RegisterCubit>().setConfirmPassword(v),
+        prefixIcon: const Icon(
+          Icons.lock_outline,
+          size: 20,
+          color: Palette.textPrimary4,
+        ),
+        suffixIcon: IconButton(
+          splashRadius: 20,
+          icon: Icon(
+            sel.$3 ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+            size: 20,
+            color: Palette.textPrimary4,
+          ),
+          onPressed: () =>
+              ctx.read<RegisterCubit>().toggleConfirmPasswordVisibility(),
         ),
       ),
     );
