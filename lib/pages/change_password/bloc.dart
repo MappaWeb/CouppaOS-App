@@ -57,9 +57,8 @@ class ChangePasswordState {
 }
 
 class ChangePasswordCubit extends Cubit<ChangePasswordState> {
-  ChangePasswordCubit({required ApiClient apiClient})
-      : _apiClient = apiClient,
-        super(const ChangePasswordState());
+  ChangePasswordCubit({required this._apiClient})
+      : super(const ChangePasswordState());
 
   final ApiClient _apiClient;
 

@@ -115,7 +115,7 @@ class _VoucherClaimViewState extends State<_VoucherClaimView> {
       ),
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => FocusScope.of(context).unfocus(),
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: BlocConsumer<VoucherClaimCubit, VoucherClaimState>(
           listenWhen: (p, c) =>
               p.summary != c.summary ||
@@ -129,27 +129,36 @@ class _VoucherClaimViewState extends State<_VoucherClaimView> {
             if (state.dialog != null) _showResultDialog(state.dialog!);
           },
           builder: (context, state) {
-            return Column(
-              children: [
-                const SizedBox(height: 12),
-                _ModeToggle(
-                  mode: state.mode,
-                  enabled: !state.isProcessing,
-                  onChanged: (m) =>
-                      context.read<VoucherClaimCubit>().switchMode(m),
+            final toggle = Padding(
+              padding: const EdgeInsets.only(top: 12, bottom: 16),
+              child: _ModeToggle(
+                mode: state.mode,
+                enabled: !state.isProcessing,
+                onChanged: (m) =>
+                    context.read<VoucherClaimCubit>().switchMode(m),
+              ),
+            );
+            return switch (state.mode) {
+              VoucherClaimMode.manual => SingleChildScrollView(
+                child: Column(
+                  children: [
+                    toggle,
+                    _ManualPanel(state: state),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: switch (state.mode) {
-                    VoucherClaimMode.manual => _ManualPanel(state: state),
-                    VoucherClaimMode.qr => _ScannerPanel(
+              ),
+              VoucherClaimMode.qr => Column(
+                children: [
+                  toggle,
+                  Expanded(
+                    child: _ScannerPanel(
                       state: state,
                       scannerKey: _scannerKey,
                     ),
-                  },
-                ),
-              ],
-            );
+                  ),
+                ],
+              ),
+            };
           },
         ),
       ),
@@ -282,14 +291,15 @@ class _ManualPanel extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FieldText(
             value: state.input,
             labelText: 'Mã voucher',
             hintText: l10n.voucherClaim_inputHint,
-            maxLines: null,
-            minLines: 8,
+            maxLines: 6,
+            minLines: 3,
             enabled: !state.isProcessing,
             textInputAction: TextInputAction.newline,
             textCapitalization: TextCapitalization.characters,
