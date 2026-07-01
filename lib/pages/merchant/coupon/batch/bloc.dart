@@ -1,4 +1,5 @@
 import '../../../../import.dart';
+import '../coupon_form_helpers.dart';
 
 /// Form phát hành lô voucher trực tiếp — `POST {AppApi.voucher.campaignIssueDirect}`.
 ///
@@ -15,17 +16,20 @@ import '../../../../import.dart';
 /// - `partnerIds` String? — comma-separated ids; optional, split khi submit (output `[{merchantId, scope:'all'}]`)
 /// - `note` String? — optional
 class MerchantCouponBatchBloc extends SystemFormBloc<SystemFormState> {
-  MerchantCouponBatchBloc({
-    required ApiClient apiClient,
-    bool isQuickCreate = false,
-  }) : this._(apiClient, isQuickCreate);
+  MerchantCouponBatchBloc({required ApiClient apiClient, bool isQuickCreate = false})
+    : this._(apiClient, isQuickCreate);
 
   MerchantCouponBatchBloc._(this._apiClient, bool isQuickCreate)
     : super(
         rules: _validationRules(),
         initialState: SystemFormState(
           status: SystemFormStateStatus.initial,
-          fields: isQuickCreate ? _quickCreateFields() : const {'scope': 'all'},
+          fields: isQuickCreate
+              ? _quickCreateFields()
+              : const {
+                  'scope': 'all',
+                  'daysOfWeek': [0, 1, 2, 3, 4, 5, 6],
+                },
           data: const {},
         ),
       );
@@ -40,44 +44,35 @@ class MerchantCouponBatchBloc extends SystemFormBloc<SystemFormState> {
       'name': 'Lô voucher test ${from.day}/${from.month}',
       'faceValue': '50.000',
       'quantity': '10',
-      'validFrom': _formatDateTime(from),
-      'validTo': _formatDateTime(to),
+      'validFrom': CouponFormHelpers.formatDateTime(from),
+      'validTo': CouponFormHelpers.formatDateTime(to),
       'scope': 'all',
       'note': 'Tạo nhanh để test',
+      'daysOfWeek': [0, 1, 2, 3, 4, 5, 6],
     };
-  }
-
-  static String _formatDateTime(DateTime dt) {
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(dt.day)}/${two(dt.month)}/${dt.year} ${two(dt.hour)}:${two(dt.minute)}';
   }
 
   static Map<String, Rules> _validationRules() => {
     'faceValue': Rules(
-    //   required: 'Vui lòng nhập mệnh giá',
-      checkData: (data) => _validatePositiveInt(data.value, 'Mệnh giá phải > 0'),
+      checkData: (data) => CouponFormHelpers.validatePositiveInt(data.value, 'Mệnh giá phải > 0'),
     ),
     'quantity': Rules(
       required: 'Vui lòng nhập số lượng',
-      checkData: (data) => _validatePositiveInt(data.value, 'Số lượng phải > 0'),
+      checkData: (data) => CouponFormHelpers.validatePositiveInt(data.value, 'Số lượng phải > 0'),
     ),
     'validFrom': Rules(
       checkData: (data) {
-        final from = _parseDateTime(data.value);
-        final to = _parseDateTime(data.fields['validTo']);
-        if (from == null && to != null) {
-          return 'Vui lòng chọn ngày bắt đầu';
-        }
+        final from = CouponFormHelpers.parseDateTime(data.value);
+        final to = CouponFormHelpers.parseDateTime(data.fields['validTo']);
+        if (from == null && to != null) return 'Vui lòng chọn ngày bắt đầu';
         return null;
       },
     ),
     'validTo': Rules(
       checkData: (data) {
-        final to = _parseDateTime(data.value);
-        final from = _parseDateTime(data.fields['validFrom']);
-        if (to == null && from != null) {
-          return 'Vui lòng chọn ngày kết thúc';
-        }
+        final to = CouponFormHelpers.parseDateTime(data.value);
+        final from = CouponFormHelpers.parseDateTime(data.fields['validFrom']);
+        if (to == null && from != null) return 'Vui lòng chọn ngày kết thúc';
         if (from != null && to != null && !to.isAfter(from)) {
           return 'Ngày kết thúc phải sau ngày bắt đầu';
         }
@@ -102,9 +97,7 @@ class MerchantCouponBatchBloc extends SystemFormBloc<SystemFormState> {
           return 'Vui lòng chọn giờ kết thúc';
         }
         if (start != null && start.isNotEmpty && end != null && end.isNotEmpty) {
-          if (end.compareTo(start) <= 0) {
-            return 'Giờ kết thúc phải sau giờ bắt đầu';
-          }
+          if (end.compareTo(start) <= 0) return 'Giờ kết thúc phải sau giờ bắt đầu';
         }
         return null;
       },
@@ -113,19 +106,11 @@ class MerchantCouponBatchBloc extends SystemFormBloc<SystemFormState> {
     'storeIds': Rules(
       checkData: (data) {
         if (data.fields['scope'] != 'stores') return null;
-        if (_splitIds(data.value).isEmpty) return 'Vui lòng chọn ít nhất 1 cơ sở';
+        if (CouponFormHelpers.splitIds(data.value).isEmpty) return 'Vui lòng chọn ít nhất 1 cơ sở';
         return null;
       },
     ),
   };
-
-  static String? _validatePositiveInt(dynamic raw, String message) {
-    final cleaned = (raw ?? '').toString().replaceAll('.', '').trim();
-    if (cleaned.isEmpty) return null;
-    final n = int.tryParse(cleaned);
-    if (n == null || n <= 0) return message;
-    return null;
-  }
 
   @override
   Future<void> onSubmit(
@@ -134,17 +119,20 @@ class MerchantCouponBatchBloc extends SystemFormBloc<SystemFormState> {
     Map<String, dynamic>? extraFields,
   }) async {
     final f = state.fields;
+    final usage = CouponFormHelpers.buildUsage(f);
+    final validFrom = CouponFormHelpers.toIsoUtc(f['validFrom']);
+    final validTo = CouponFormHelpers.toIsoUtc(f['validTo']);
 
     final payload = <String, dynamic>{
       if ((f['name'] as String?)?.trim().isNotEmpty ?? false) 'name': (f['name'] as String).trim(),
-      'quantity': _parseInt(f['quantity']),
-      'faceValue': _parseInt(f['faceValue']).toString(),
+      'quantity': CouponFormHelpers.parseInt(f['quantity']),
+      'faceValue': CouponFormHelpers.parseInt(f['faceValue']).toString(),
       if ((f['note'] as String?)?.trim().isNotEmpty ?? false) 'note': (f['note'] as String).trim(),
-      if (_toIsoUtc(f['validFrom']) != null) 'validFrom': _toIsoUtc(f['validFrom']),
-      if (_toIsoUtc(f['validTo']) != null) 'validTo': _toIsoUtc(f['validTo']),
-      'usage': _buildUsage(f),
-      'acceptance': _buildAcceptance(f),
-    }..removeWhere((_, v) => v == null);
+      if (validFrom != null) 'validFrom': validFrom,
+      if (validTo != null) 'validTo': validTo,
+      if (usage != null) 'usage': usage,
+      'acceptance': CouponFormHelpers.buildAcceptance(f),
+    };
 
     try {
       final dio = _apiClient.dio(ApiService.coupon);
@@ -153,80 +141,16 @@ class MerchantCouponBatchBloc extends SystemFormBloc<SystemFormState> {
       emit(state.copyWith(status: SystemFormStateStatus.fail, message: _mapError(e)));
       return;
     } catch (_) {
-      emit(state.copyWith(
-        status: SystemFormStateStatus.fail,
-        message: 'Phát hành lô voucher thất bại',
-      ));
+      emit(
+        state.copyWith(
+          status: SystemFormStateStatus.fail,
+          message: 'Phát hành lô voucher thất bại',
+        ),
+      );
       return;
     }
 
     await onSuccess(const {'status': 'SUCCESS'}, emit);
-  }
-
-  static int _parseInt(dynamic raw) {
-    final cleaned = (raw ?? '').toString().replaceAll('.', '').trim();
-    return int.tryParse(cleaned) ?? 0;
-  }
-
-  static String? _toIsoUtc(dynamic raw) {
-    final dt = _parseDateTime(raw);
-    if (dt == null) return null;
-    return dt.toUtc().toIso8601String();
-  }
-
-  /// Parse format từ `FieldDateTime` (`dd/MM/yyyy HH:mm`). Fallback: ISO-8601.
-  static DateTime? _parseDateTime(dynamic raw) {
-    final s = raw?.toString().trim();
-    if (s == null || s.isEmpty) return null;
-    final parts = s.split(' ');
-    if (parts.length == 2) {
-      final d = parts[0].split('/');
-      final t = parts[1].split(':');
-      if (d.length == 3 && t.length >= 2) {
-        final year = int.tryParse(d[2]);
-        final month = int.tryParse(d[1]);
-        final day = int.tryParse(d[0]);
-        final hour = int.tryParse(t[0]);
-        final min = int.tryParse(t[1]);
-        if (year != null && month != null && day != null && hour != null && min != null) {
-          return DateTime(year, month, day, hour, min);
-        }
-      }
-    }
-    return DateTime.tryParse(s);
-  }
-
-  static Map<String, dynamic>? _buildUsage(Map<String, dynamic> f) {
-    final days = ((f['daysOfWeek'] as List?) ?? const []).cast<int>();
-    final start = ((f['timeStart'] as String?) ?? '').trim();
-    final end = ((f['timeEnd'] as String?) ?? '').trim();
-    final hasWindow = start.isNotEmpty && end.isNotEmpty;
-    if (days.isEmpty && !hasWindow) return null;
-    return {
-      if (days.isNotEmpty) 'daysOfWeek': days,
-      if (hasWindow)
-        'windows': [
-          {'start': start, 'end': end},
-        ],
-    };
-  }
-
-  static Map<String, dynamic> _buildAcceptance(Map<String, dynamic> f) {
-    final scope = (f['scope'] as String?) ?? 'all';
-    final storeIds = _splitIds(f['storeIds']);
-    final partnerIds = _splitIds(f['partnerIds']);
-    return {
-      'scope': scope,
-      if (scope == 'stores' && storeIds.isNotEmpty) 'storeIds': storeIds,
-      if (partnerIds.isNotEmpty)
-        'partners': partnerIds.map((id) => {'merchantId': id, 'scope': 'all'}).toList(),
-    };
-  }
-
-  static List<String> _splitIds(dynamic raw) {
-    final s = raw?.toString() ?? '';
-    if (s.isEmpty) return const [];
-    return s.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
   }
 
   static String _mapError(DioException e) {

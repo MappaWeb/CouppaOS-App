@@ -1,4 +1,5 @@
 import '../../../../import.dart';
+import '../coupon_form_helpers.dart';
 
 /// Form tạo/sửa campaign — `POST {AppApi.voucher.campaigns}` / `PATCH {AppApi.voucher.campaignById(id)}`.
 ///
@@ -34,6 +35,7 @@ class MerchantCouponCampaignFormBloc extends SystemFormBloc<SystemFormState> {
         'scope': 'all',
         'claimLayout': 'A',
         'otpRequired': false,
+        'daysOfWeek': [0, 1, 2, 3, 4, 5, 6],
       };
     }
 
@@ -50,12 +52,11 @@ class MerchantCouponCampaignFormBloc extends SystemFormBloc<SystemFormState> {
       return buf.toString();
     }
 
-    String? formatDateTime(dynamic v) {
+    String? formatDt(dynamic v) {
       if (v == null) return null;
       final dt = v is DateTime ? v.toLocal() : DateTime.tryParse(v.toString())?.toLocal();
       if (dt == null) return null;
-      String two(int n) => n.toString().padLeft(2, '0');
-      return '${two(dt.day)}/${two(dt.month)}/${dt.year} ${two(dt.hour)}:${two(dt.minute)}';
+      return CouponFormHelpers.formatDateTime(dt);
     }
 
     final windows = data['usageWindows'];
@@ -94,8 +95,8 @@ class MerchantCouponCampaignFormBloc extends SystemFormBloc<SystemFormState> {
       if ((data['name'] ?? '').toString().isNotEmpty) 'name': data['name'].toString(),
       if (formatThousands(data['faceValue']) != null) 'faceValue': formatThousands(data['faceValue']),
       if (formatThousands(data['totalQuantity']) != null) 'quantity': formatThousands(data['totalQuantity']),
-      if (formatDateTime(data['validFrom']) != null) 'validFrom': formatDateTime(data['validFrom']),
-      if (formatDateTime(data['validTo']) != null) 'validTo': formatDateTime(data['validTo']),
+      if (formatDt(data['validFrom']) != null) 'validFrom': formatDt(data['validFrom']),
+      if (formatDt(data['validTo']) != null) 'validTo': formatDt(data['validTo']),
       if (daysList.isNotEmpty) 'daysOfWeek': daysList,
       if (timeStart != null && timeStart.isNotEmpty) 'timeStart': timeStart,
       if (timeEnd != null && timeEnd.isNotEmpty) 'timeEnd': timeEnd,
@@ -114,20 +115,18 @@ class MerchantCouponCampaignFormBloc extends SystemFormBloc<SystemFormState> {
   static Map<String, Rules> _validationRules() => {
         'name': Rules(required: 'Vui lòng nhập tên chiến dịch'),
         'faceValue': Rules(
-          checkData: (data) => _validatePositiveInt(data.value, 'Mệnh giá phải > 0'),
+          checkData: (data) => CouponFormHelpers.validatePositiveInt(data.value, 'Mệnh giá phải > 0'),
         ),
         'quantity': Rules(
           required: 'Vui lòng nhập số lượng',
-          checkData: (data) => _validatePositiveInt(data.value, 'Số lượng phải > 0'),
+          checkData: (data) => CouponFormHelpers.validatePositiveInt(data.value, 'Số lượng phải > 0'),
         ),
-        'validFrom': Rules(
-          required: 'Vui lòng chọn ngày bắt đầu',
-        ),
+        'validFrom': Rules(required: 'Vui lòng chọn ngày bắt đầu'),
         'validTo': Rules(
           required: 'Vui lòng chọn ngày kết thúc',
           checkData: (data) {
-            final to = _parseDateTime(data.value);
-            final from = _parseDateTime(data.fields['validFrom']);
+            final to = CouponFormHelpers.parseDateTime(data.value);
+            final from = CouponFormHelpers.parseDateTime(data.fields['validFrom']);
             if (from != null && to != null && !to.isAfter(from)) {
               return 'Ngày kết thúc phải sau ngày bắt đầu';
             }
@@ -152,9 +151,7 @@ class MerchantCouponCampaignFormBloc extends SystemFormBloc<SystemFormState> {
               return 'Vui lòng chọn giờ kết thúc';
             }
             if (start != null && start.isNotEmpty && end != null && end.isNotEmpty) {
-              if (end.compareTo(start) <= 0) {
-                return 'Giờ kết thúc phải sau giờ bắt đầu';
-              }
+              if (end.compareTo(start) <= 0) return 'Giờ kết thúc phải sau giờ bắt đầu';
             }
             return null;
           },
@@ -163,20 +160,12 @@ class MerchantCouponCampaignFormBloc extends SystemFormBloc<SystemFormState> {
         'storeIds': Rules(
           checkData: (data) {
             if (data.fields['scope'] != 'stores') return null;
-            if (_splitIds(data.value).isEmpty) return 'Vui lòng chọn ít nhất 1 cơ sở';
+            if (CouponFormHelpers.splitIds(data.value).isEmpty) return 'Vui lòng chọn ít nhất 1 cơ sở';
             return null;
           },
         ),
         'claimLayout': Rules(required: 'Vui lòng chọn giao diện trang nhận quà'),
       };
-
-  static String? _validatePositiveInt(dynamic raw, String message) {
-    final cleaned = (raw ?? '').toString().replaceAll('.', '').trim();
-    if (cleaned.isEmpty) return null;
-    final n = int.tryParse(cleaned);
-    if (n == null || n <= 0) return message;
-    return null;
-  }
 
   @override
   Future<void> onSubmit(
@@ -185,19 +174,21 @@ class MerchantCouponCampaignFormBloc extends SystemFormBloc<SystemFormState> {
     Map<String, dynamic>? extraFields,
   }) async {
     final f = state.fields;
+    final usage = CouponFormHelpers.buildUsage(f);
+    final faceValue = CouponFormHelpers.parseInt(f['faceValue']);
 
     final payload = <String, dynamic>{
       'name': (f['name'] as String).trim(),
       'claimLayout': (f['claimLayout'] as String?) ?? 'A',
-      'totalQuantity': _parseInt(f['quantity']),
-      'validFrom': _toIsoUtc(f['validFrom']),
-      'validTo': _toIsoUtc(f['validTo']),
+      'totalQuantity': CouponFormHelpers.parseInt(f['quantity']),
+      'validFrom': CouponFormHelpers.toIsoUtc(f['validFrom']),
+      'validTo': CouponFormHelpers.toIsoUtc(f['validTo']),
       'policy': {'otpRequired': (f['otpRequired'] as bool?) ?? false},
-      'acceptance': _buildAcceptance(f),
+      'acceptance': CouponFormHelpers.buildAcceptance(f),
       if ((f['code'] as String?)?.trim().isNotEmpty ?? false) 'code': (f['code'] as String).trim(),
-      if (_parseInt(f['faceValue']) > 0) 'faceValue': _parseInt(f['faceValue']).toString(),
+      if (faceValue > 0) 'faceValue': faceValue.toString(),
       if ((f['note'] as String?)?.trim().isNotEmpty ?? false) 'note': (f['note'] as String).trim(),
-      if (_buildUsage(f) != null) 'usage': _buildUsage(f),
+      'usage': ?usage,
     };
 
     try {
@@ -220,72 +211,6 @@ class MerchantCouponCampaignFormBloc extends SystemFormBloc<SystemFormState> {
     }
 
     await onSuccess(const {'status': 'SUCCESS'}, emit);
-  }
-
-  static int _parseInt(dynamic raw) {
-    final cleaned = (raw ?? '').toString().replaceAll('.', '').trim();
-    return int.tryParse(cleaned) ?? 0;
-  }
-
-  static String? _toIsoUtc(dynamic raw) {
-    final dt = _parseDateTime(raw);
-    if (dt == null) return null;
-    return dt.toUtc().toIso8601String();
-  }
-
-  /// Parse format từ `FieldDateTime` (`dd/MM/yyyy HH:mm`). Fallback: ISO-8601.
-  static DateTime? _parseDateTime(dynamic raw) {
-    final s = raw?.toString().trim();
-    if (s == null || s.isEmpty) return null;
-    final parts = s.split(' ');
-    if (parts.length == 2) {
-      final d = parts[0].split('/');
-      final t = parts[1].split(':');
-      if (d.length == 3 && t.length >= 2) {
-        final year = int.tryParse(d[2]);
-        final month = int.tryParse(d[1]);
-        final day = int.tryParse(d[0]);
-        final hour = int.tryParse(t[0]);
-        final min = int.tryParse(t[1]);
-        if (year != null && month != null && day != null && hour != null && min != null) {
-          return DateTime(year, month, day, hour, min);
-        }
-      }
-    }
-    return DateTime.tryParse(s);
-  }
-
-  static Map<String, dynamic>? _buildUsage(Map<String, dynamic> f) {
-    final days = ((f['daysOfWeek'] as List?) ?? const []).cast<int>();
-    final start = ((f['timeStart'] as String?) ?? '').trim();
-    final end = ((f['timeEnd'] as String?) ?? '').trim();
-    final hasWindow = start.isNotEmpty && end.isNotEmpty;
-    if (days.isEmpty && !hasWindow) return null;
-    return {
-      if (days.isNotEmpty) 'daysOfWeek': days,
-      if (hasWindow)
-        'windows': [
-          {'start': start, 'end': end},
-        ],
-    };
-  }
-
-  static Map<String, dynamic> _buildAcceptance(Map<String, dynamic> f) {
-    final scope = (f['scope'] as String?) ?? 'all';
-    final storeIds = _splitIds(f['storeIds']);
-    final partnerIds = _splitIds(f['partnerIds']);
-    return {
-      'scope': scope,
-      if (scope == 'stores' && storeIds.isNotEmpty) 'storeIds': storeIds,
-      if (partnerIds.isNotEmpty)
-        'partners': partnerIds.map((id) => {'merchantId': id, 'scope': 'all'}).toList(),
-    };
-  }
-
-  static List<String> _splitIds(dynamic raw) {
-    final s = raw?.toString() ?? '';
-    if (s.isEmpty) return const [];
-    return s.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
   }
 
   String _mapError(DioException e) {
