@@ -9,7 +9,7 @@ class OtpState {
     this.isSubmitting = false,
     this.isResending = false,
     this.secondsLeft = 0,
-    this.isHardBlocked = false,
+    this.blockedMessage,
     this.errorMessage,
   });
 
@@ -18,9 +18,14 @@ class OtpState {
   final bool isSubmitting;
   final bool isResending;
   final int secondsLeft;
-  final bool isHardBlocked;
+
+  /// Thông báo bị chặn cứng (>= 1 giờ) — hiển thị dạng banner cố định.
+  final String? blockedMessage;
+
+  /// Thông báo lỗi một lần — hiển thị dạng toast rồi biến mất.
   final String? errorMessage;
 
+  bool get isHardBlocked => blockedMessage != null;
   bool get canResend =>
       secondsLeft <= 0 && !isResending && !isHardBlocked;
 
@@ -30,7 +35,7 @@ class OtpState {
     bool? isSubmitting,
     bool? isResending,
     int? secondsLeft,
-    bool? isHardBlocked,
+    String? blockedMessage,
     String? errorMessage,
   }) {
     return OtpState(
@@ -39,7 +44,7 @@ class OtpState {
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isResending: isResending ?? this.isResending,
       secondsLeft: secondsLeft ?? this.secondsLeft,
-      isHardBlocked: isHardBlocked ?? this.isHardBlocked,
+      blockedMessage: blockedMessage ?? this.blockedMessage,
       errorMessage: errorMessage,
     );
   }
@@ -94,7 +99,7 @@ class OtpCubit extends Cubit<OtpState> {
   }
 
   Future<void> _sendOtp({bool initial = false}) async {
-    if (state.isResending) return;
+    if (state.isResending || state.isHardBlocked) return;
     emit(state.copyWith(isResending: true));
     try {
       final dio = _apiClient.dio(ApiService.auth);
@@ -104,11 +109,15 @@ class OtpCubit extends Cubit<OtpState> {
       if (!initial) showMessage('Đã gửi lại mã xác thực', type: 'success');
     } on DioException catch (e) {
       final wait = _parseRiskBlockedSeconds(e);
-      final hardBlocked = wait != null && wait >= 3600;
+      final isHardBlock = wait != null && wait >= 3600;
+      // Initial + soft backoff: giả định OTP đã gửi từ bước register trước đó,
+      // đây chỉ là thông tin cooldown → không show toast, chỉ chạy countdown.
+      final silentBackoff = initial && wait != null && !isHardBlock;
+      final mapped = _mapError(e);
       emit(state.copyWith(
         isResending: false,
-        isHardBlocked: hardBlocked,
-        errorMessage: _mapError(e),
+        blockedMessage: isHardBlock ? mapped : null,
+        errorMessage: (isHardBlock || silentBackoff) ? null : mapped,
       ));
       if (wait != null) {
         _startCountdown(wait);
@@ -151,7 +160,7 @@ class OtpCubit extends Cubit<OtpState> {
   /// `/auth/otp/verify` chỉ trả `{status:"ACTIVE"}` (không có token), nên cần
   /// gọi tiếp `/auth/login` bằng SĐT + mật khẩu đã đăng ký.
   Future<bool> verify() async {
-    if (state.isSubmitting) return false;
+    if (state.isSubmitting || state.isHardBlocked) return false;
 
     final code = state.code.trim();
     if (code.length != _otpLength) {
@@ -168,7 +177,13 @@ class OtpCubit extends Cubit<OtpState> {
         data: {'phone': _phone, 'code': code},
       );
     } on DioException catch (e) {
-      emit(state.copyWith(isSubmitting: false, errorMessage: _mapError(e)));
+      final mapped = _mapError(e);
+      final tooMany = _isOtpTooMany(e);
+      emit(state.copyWith(
+        isSubmitting: false,
+        blockedMessage: tooMany ? mapped : null,
+        errorMessage: tooMany ? null : mapped,
+      ));
       return false;
     } catch (_) {
       emit(state.copyWith(
@@ -228,6 +243,16 @@ class OtpCubit extends Cubit<OtpState> {
   Future<void> resend() async {
     if (!state.canResend) return;
     await _sendOtp();
+  }
+
+  bool _isOtpTooMany(DioException e) {
+    final data = e.response?.data;
+    if (data is! Map) return false;
+    final error = data['error'];
+    if (error is! Map) return false;
+    if (error['code']?.toString() != 'VALIDATION_ERROR') return false;
+    final message = error['message']?.toString() ?? '';
+    return message.contains('TOO_MANY');
   }
 
   String _mapError(DioException e) {

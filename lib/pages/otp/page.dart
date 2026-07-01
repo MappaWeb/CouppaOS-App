@@ -66,7 +66,9 @@ class _OtpView extends StatelessWidget {
               children: [
                 const SizedBox(height: 8),
                 _Header(phone: phone),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
+                const _BlockBanner(),
+                const SizedBox(height: 12),
                 const _OtpInputField(),
                 const SizedBox(height: 24),
                 _SubmitButton(onPressed: () => _verify(context)),
@@ -291,12 +293,16 @@ class _SubmitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<OtpCubit, OtpState, bool>(
-      selector: (s) => s.isSubmitting,
-      builder: (_, isSubmitting) => SizedBox(
+    return BlocSelector<OtpCubit, OtpState, (bool, bool)>(
+      selector: (s) => (s.isSubmitting, s.isHardBlocked),
+      builder: (_, sel) {
+        final isSubmitting = sel.$1;
+        final isHardBlocked = sel.$2;
+        final disabled = isSubmitting || isHardBlocked;
+        return SizedBox(
         height: 56,
         child: FilledButton(
-          onPressed: isSubmitting ? null : onPressed,
+          onPressed: disabled ? null : onPressed,
           style: FilledButton.styleFrom(
             backgroundColor: Palette.primary,
             disabledBackgroundColor: Palette.primary.withValues(alpha: 0.5),
@@ -321,7 +327,8 @@ class _SubmitButton extends StatelessWidget {
                 )
               : const Text('Xác nhận'),
         ),
-      ),
+      );
+      },
     );
   }
 }
@@ -399,5 +406,52 @@ class _ResendRow extends StatelessWidget {
           '${s.toString().padLeft(2, '0')}';
     }
     return '${seconds}s';
+  }
+}
+
+class _BlockBanner extends StatelessWidget {
+  const _BlockBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<OtpCubit, OtpState, String?>(
+      selector: (s) => s.blockedMessage,
+      builder: (_, message) {
+        if (message == null) return const SizedBox.shrink();
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Palette.redTxtColor.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Palette.redTxtColor.withValues(alpha: 0.35),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: Palette.redTxtColor,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    height: 1.4,
+                    color: Palette.redTxtColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
