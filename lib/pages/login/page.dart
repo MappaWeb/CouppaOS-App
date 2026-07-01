@@ -22,6 +22,7 @@ class _LoginView extends StatelessWidget {
   static const _hPadding = 24.0;
 
   Future<void> _submit(BuildContext context) async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final ok = await context.read<LoginCubit>().submit();
     if (!context.mounted) return;
     if (ok) {
@@ -40,10 +41,21 @@ class _LoginView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: BlocListener<LoginCubit, LoginState>(
-        listenWhen: (p, c) =>
-            p.errorMessage != c.errorMessage && c.errorMessage != null,
-        listener: (_, s) => showMessage(s.errorMessage!, type: 'error'),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<LoginCubit, LoginState>(
+            listenWhen: (p, c) =>
+                p.errorMessage != c.errorMessage && c.errorMessage != null,
+            listener: (_, s) => showMessage(s.errorMessage!, type: 'error'),
+          ),
+          BlocListener<LoginCubit, LoginState>(
+            listenWhen: (p, c) => !p.otpRequired && c.otpRequired,
+            listener: (ctx, s) => appNavigator.pushNamed(
+              RouterConstants.otp,
+              arguments: {'phone': s.phone.trim(), 'password': s.password},
+            ),
+          ),
+        ],
         child: GestureDetector(
           onTap: () {
             FocusManager.instance.primaryFocus?.unfocus();

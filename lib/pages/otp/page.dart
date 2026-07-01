@@ -331,11 +331,13 @@ class _ResendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<OtpCubit, OtpState, (int, bool)>(
-      selector: (s) => (s.secondsLeft, s.canResend),
+    return BlocSelector<OtpCubit, OtpState, (int, bool, bool)>(
+      selector: (s) => (s.secondsLeft, s.canResend, s.isHardBlocked),
       builder: (ctx, sel) {
         final secondsLeft = sel.$1;
         final canResend = sel.$2;
+        final isHardBlocked = sel.$3;
+        if (isHardBlocked) return const SizedBox.shrink();
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -367,7 +369,7 @@ class _ResendRow extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                 child: Text(
-                  'Gửi lại sau ${secondsLeft}s',
+                  'Gửi lại sau ${_formatCountdown(secondsLeft)}',
                   style: const TextStyle(
                     fontSize: 14,
                     color: Palette.textPrimary4,
@@ -379,5 +381,23 @@ class _ResendRow extends StatelessWidget {
         );
       },
     );
+  }
+
+  static String _formatCountdown(int seconds) {
+    if (seconds >= 3600) {
+      final h = seconds ~/ 3600;
+      final m = (seconds % 3600) ~/ 60;
+      final s = seconds % 60;
+      return '${h.toString().padLeft(2, '0')}:'
+          '${m.toString().padLeft(2, '0')}:'
+          '${s.toString().padLeft(2, '0')}';
+    }
+    if (seconds >= 60) {
+      final m = seconds ~/ 60;
+      final s = seconds % 60;
+      return '${m.toString().padLeft(2, '0')}:'
+          '${s.toString().padLeft(2, '0')}';
+    }
+    return '${seconds}s';
   }
 }
