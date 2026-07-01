@@ -26,10 +26,30 @@ class LoadingPage extends StatelessWidget {
             ),
             const SizedBox(height: 60),
 
-            BlocSelector<ConfigBloc, ConfigState, double>(
-              selector: (state) => state.percentLoading,
-              builder: (context, percentLoading) {
-                final value = (percentLoading / 100).clamp(0.0, 1.0);
+            BlocSelector<ConfigBloc, ConfigState, ConfigStateStatus>(
+              selector: (state) => state.status,
+              builder: (context, status) {
+                if (status == ConfigStateStatus.error) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                    child: Column(
+                      spacing: 12,
+                      children: [
+                        const Icon(Icons.wifi_off, size: 32, color: Palette.redTxtColor),
+                        const Text(
+                          'Không thể kết nối. Vui lòng kiểm tra mạng và thử lại.',
+                          textAlign: .center,
+                          style: TextStyle(color: Palette.redTxtColor, fontSize: 14, fontWeight: .w500),
+                        ),
+                        FilledButton(
+                          style: FilledButton.styleFrom(backgroundColor: Palette.primary),
+                          onPressed: () => context.read<ConfigBloc>().refresh(true),
+                          child: const Text('Thử lại'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 28.0),
@@ -38,22 +58,14 @@ class LoadingPage extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0, end: value),
-                          duration: const Duration(milliseconds: 600),
-                          curve: Curves.easeInOut,
-                          builder: (context, animatedValue, _) {
-                            return LinearProgressIndicator(
-                              value: animatedValue,
-                              minHeight: 10,
-                              backgroundColor: Palette.primary.withValues(alpha: 0.15),
-                              valueColor: const AlwaysStoppedAnimation<Color>(Palette.primary),
-                            );
-                          },
+                        child: LinearProgressIndicator(
+                          minHeight: 10,
+                          backgroundColor: Palette.primary.withValues(alpha: 0.15),
+                          valueColor: const AlwaysStoppedAnimation<Color>(Palette.primary),
                         ),
                       ),
                       Text(
-                        '${parseInt(percentLoading)} %',
+                        _statusText(status),
                         style: const TextStyle(color: Palette.primary, fontSize: 14, fontWeight: .w400),
                       ),
                     ],
@@ -66,5 +78,16 @@ class LoadingPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _statusText(ConfigStateStatus status) {
+    switch (status) {
+      case ConfigStateStatus.loaded:
+        return 'Đã sẵn sàng';
+      case ConfigStateStatus.loading:
+      case ConfigStateStatus.initial:
+      case ConfigStateStatus.error:
+        return 'Đang khởi động...';
+    }
   }
 }

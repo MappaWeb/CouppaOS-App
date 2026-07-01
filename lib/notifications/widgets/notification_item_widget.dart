@@ -78,12 +78,7 @@ class NotificationItemWidget extends StatelessWidget {
   Widget _buildLeading(bool isRead) {
     if (notification.imageUrl != null && notification.imageUrl!.isNotEmpty) {
       return ClipOval(
-        child: ImageViewer(
-          notification.imageUrl,
-          width: 48,
-          height: 48,
-          notThumb: true,
-        ),
+        child: AppImage(image: notification.imageUrl, width: 48, height: 48),
       );
     }
     return Container(
