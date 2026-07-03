@@ -16,7 +16,10 @@ import 'widget/app_auth_listener.dart';
 Future<void> bootstrap(SharedMonitoring monitoring) async {
   final config = AppFlavorConfig.instance;
   configureAppSite(domain: config.appDomain, title: config.appName);
-  final apiClient = ApiClient(ApiService.urlsFrom(config.apiDomain));
+  final apiClient = ApiClient({
+    for (final s in ApiService.values)
+      s: 'https://${s.subdomain}-${config.apiDomain}',
+  });
 
   apiClient.addInterceptorToAll(const AuthMeRolesInterceptor());
   if (config.enableLogging) {
@@ -30,7 +33,7 @@ Future<void> bootstrap(SharedMonitoring monitoring) async {
 
   final authSetup = AuthSetup.create(
     apiClient: apiClient,
-    authBaseUrl: 'https://${ApiService.auth.subdomain}.${config.apiDomain}',
+    authBaseUrl: 'https://${ApiService.auth.subdomain}-${config.apiDomain}',
     config: const AuthConfig(
       mePath: '/auth/me',
       refreshPath: '/auth/refresh',
@@ -82,7 +85,7 @@ Future<void> bootstrap(SharedMonitoring monitoring) async {
       uploadService: createFileUploadService(
         dio: apiClient.dio(ApiService.file),
         config: FileUploadConfig(
-          baseUrl: 'https://${ApiService.file.subdomain}.${config.apiDomain}',
+          baseUrl: 'https://${ApiService.file.subdomain}-${config.apiDomain}',
           flow: FileUploadFlow.direct,
         ),
       ),

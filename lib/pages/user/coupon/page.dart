@@ -149,7 +149,7 @@ class _CouponList extends StatelessWidget {
       onRefresh: () => _onRefresh(context),
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.fromLTRB(16,16,16,MediaQuery.paddingOf(context).bottom),
         itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (context, i) {

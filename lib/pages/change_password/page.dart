@@ -7,9 +7,7 @@ class ChangePasswordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (ctx) => ChangePasswordCubit(
-        apiClient: ctx.read<ApiClient>(),
-      ),
+      create: (ctx) => ChangePasswordCubit(apiClient: ctx.read<ApiClient>()),
       child: const _ChangePasswordView(),
     );
   }
@@ -21,6 +19,7 @@ class _ChangePasswordView extends StatelessWidget {
   static const _hPadding = 24.0;
 
   Future<void> _onSubmit(BuildContext context) async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final cubit = context.read<ChangePasswordCubit>();
     final ok = await cubit.submit();
     if (!context.mounted) return;
@@ -34,38 +33,46 @@ class _ChangePasswordView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: BaseAppBar(
+        context: context,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
       body: BlocListener<ChangePasswordCubit, ChangePasswordState>(
         listenWhen: (p, c) =>
             p.errorMessage != c.errorMessage && c.errorMessage != null,
         listener: (_, s) => showMessage(s.errorMessage!, type: 'error'),
         child: GestureDetector(
-          onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
-          },
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: SafeArea(
+            top: false,
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: _hPadding),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: MediaQuery.sizeOf(context).height -
-                      MediaQuery.paddingOf(context).vertical,
+                      MediaQuery.paddingOf(context).vertical -
+                      kToolbarHeight,
                 ),
                 child: IntrinsicHeight(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const _TopBar(),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 8),
                       const _Brand(),
                       const SizedBox(height: 40),
                       const _Header(),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 24),
                       const _OldPasswordField(),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       const _NewPasswordField(),
                       const SizedBox(height: 12),
+                      const _PasswordRequirements(),
+                      const SizedBox(height: 16),
                       const _ConfirmField(),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 24),
                       _PrimaryButton(onPressed: () => _onSubmit(context)),
                       const Spacer(),
                       const SizedBox(height: 16),
@@ -76,26 +83,6 @@ class _ChangePasswordView extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        visualDensity: VisualDensity.compact,
-        icon: const Icon(
-          Icons.arrow_back,
-          color: Palette.textPrimary,
-        ),
-        onPressed: () => appNavigator.pop(),
       ),
     );
   }
@@ -115,11 +102,7 @@ class _Brand extends StatelessWidget {
             color: Palette.primary,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Icon(
-            Icons.lock_outline,
-            size: 32,
-            color: Colors.white,
-          ),
+          child: const Icon(Icons.lock_outline, size: 32, color: Colors.white),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -154,7 +137,7 @@ class _Header extends StatelessWidget {
             letterSpacing: -0.4,
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 12),
         Text(
           'Cập nhật mật khẩu mới để bảo vệ tài khoản của bạn.',
           style: TextStyle(
@@ -186,11 +169,8 @@ class _OldPasswordField extends StatelessWidget {
         obscureText: sel.$3,
         textInputAction: TextInputAction.next,
         onChanged: (v) => ctx.read<ChangePasswordCubit>().setOldPassword(v),
-        prefixIcon: const Icon(
-          Icons.lock_outline,
-          size: 20,
-          color: Palette.textPrimary4,
-        ),
+        prefixIcon: const Icon(Icons.lock_outline,
+            size: 20, color: Palette.textPrimary4),
         suffixIcon: IconButton(
           splashRadius: 20,
           icon: Icon(
@@ -223,11 +203,8 @@ class _NewPasswordField extends StatelessWidget {
         obscureText: sel.$3,
         textInputAction: TextInputAction.next,
         onChanged: (v) => ctx.read<ChangePasswordCubit>().setNewPassword(v),
-        prefixIcon: const Icon(
-          Icons.lock_outline,
-          size: 20,
-          color: Palette.textPrimary4,
-        ),
+        prefixIcon: const Icon(Icons.lock_outline,
+            size: 20, color: Palette.textPrimary4),
         suffixIcon: IconButton(
           splashRadius: 20,
           icon: Icon(
@@ -260,14 +237,10 @@ class _ConfirmField extends StatelessWidget {
         required: true,
         obscureText: sel.$3,
         textInputAction: TextInputAction.done,
-        onChanged: (v) =>
-            ctx.read<ChangePasswordCubit>().setConfirmPassword(v),
+        onChanged: (v) => ctx.read<ChangePasswordCubit>().setConfirmPassword(v),
         onSubmitted: (_) => ctx.read<ChangePasswordCubit>().submit(),
-        prefixIcon: const Icon(
-          Icons.lock_outline,
-          size: 20,
-          color: Palette.textPrimary4,
-        ),
+        prefixIcon: const Icon(Icons.lock_outline,
+            size: 20, color: Palette.textPrimary4),
         suffixIcon: IconButton(
           splashRadius: 20,
           icon: Icon(
@@ -279,6 +252,76 @@ class _ConfirmField extends StatelessWidget {
               ctx.read<ChangePasswordCubit>().toggleConfirmVisibility(),
         ),
       ),
+    );
+  }
+}
+
+class _PasswordRequirements extends StatelessWidget {
+  const _PasswordRequirements();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<ChangePasswordCubit, ChangePasswordState, String>(
+      selector: (s) => s.newPassword,
+      builder: (_, password) {
+        final rules = <(String, bool)>[
+          ('Tối thiểu 8 ký tự', password.length >= 8),
+          ('1 chữ hoa (A–Z)', RegExp(r'[A-Z]').hasMatch(password)),
+          ('1 chữ thường (a–z)', RegExp(r'[a-z]').hasMatch(password)),
+          ('1 chữ số (0–9)', RegExp(r'[0-9]').hasMatch(password)),
+          ('1 ký tự đặc biệt (!@#\$%^&*)',
+              RegExp(r'[!@#\$%\^&*]').hasMatch(password)),
+        ];
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Palette.bgColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var i = 0; i < rules.length; i++) ...[
+                if (i > 0) const SizedBox(height: 6),
+                _RequirementItem(text: rules[i].$1, satisfied: rules[i].$2),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _RequirementItem extends StatelessWidget {
+  const _RequirementItem({required this.text, required this.satisfied});
+
+  final String text;
+  final bool satisfied;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = satisfied ? Palette.successTxtColor : Palette.textPrimary4;
+    return Row(
+      children: [
+        Icon(
+          satisfied ? Icons.check_circle : Icons.radio_button_unchecked,
+          size: 16,
+          color: color,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: satisfied ? FontWeight.w500 : FontWeight.w400,
+              color: color,
+              height: 1.35,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

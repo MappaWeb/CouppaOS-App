@@ -17,15 +17,15 @@ abstract final class AppApi {
 
   /// Voucher / Coupon campaigns — absolute URLs (domain riêng,
   /// không có trong `ApiService` enum).
-  /// Base: `https://voucher.api-qr.iotcommunication.net`.
+  /// Base: `https://voucher-api-qr.dev.iotcommunication.net`.
   static final voucher = _VoucherPaths();
 
   /// Merchant Partner / Link APIs — absolute URLs (domain riêng).
-  /// Base: `https://merchant.api-qr.iotcommunication.net`.
+  /// Base: `https://merchant-api-qr.dev.iotcommunication.net`.
   static final partner = _PartnerPaths();
 
   /// Campaign statistics — absolute URLs (domain riêng).
-  /// Base: `https://stats.api-qr.iotcommunication.net`.
+  /// Base: `https://stats-api-qr.dev.iotcommunication.net`.
   static final stats = _StatsPaths();
 }
 
@@ -137,13 +137,13 @@ final class _MerchantPaths {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// Voucher — https://voucher.api-qr.iotcommunication.net  (absolute URLs)
+// Voucher — https://voucher-api-qr.dev.iotcommunication.net  (absolute URLs)
 // ═════════════════════════════════════════════════════════════════════
 
 final class _VoucherPaths {
   _VoucherPaths();
 
-  static const _base = 'https://voucher.api-qr.iotcommunication.net';
+  static const _base = 'https://voucher-api-qr.dev.iotcommunication.net';
 
   /// Ghép `_base` với path tương đối → URL tuyệt đối cho Dio.
   static String _abs(String path) => '$_base$path';
@@ -258,13 +258,13 @@ final class _VoucherPaths {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// Merchant Partner / Link — https://merchant.api-qr.iotcommunication.net
+// Merchant Partner / Link — https://merchant-api-qr.dev.iotcommunication.net
 // ═════════════════════════════════════════════════════════════════════
 
 final class _PartnerPaths {
   _PartnerPaths();
 
-  static const _base = 'https://merchant.api-qr.iotcommunication.net';
+  static const _base = 'https://merchant-api-qr.dev.iotcommunication.net';
 
   static String _abs(String path) => '$_base$path';
 
@@ -298,13 +298,13 @@ final class _PartnerPaths {
 }
 
 // ═════════════════════════════════════════════════════════════════════
-// Stats — https://stats.api-qr.iotcommunication.net
+// Stats — https://stats-api-qr.dev.iotcommunication.net
 // ═════════════════════════════════════════════════════════════════════
 
 final class _StatsPaths {
   _StatsPaths();
 
-  static const _base = 'https://stats.api-qr.iotcommunication.net';
+  static const _base = 'https://stats-api-qr.dev.iotcommunication.net';
 
   static String _abs(String path) => '$_base$path';
 
